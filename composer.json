@@ -13,8 +13,7 @@
             "SDS\\": "src/"
         },
         "files": [
-            "src/helpers/functions.php",
-            "src/helpers/extensionsHandler.php"
+            "src/helpers/functions.php"
         ]
     },
     "autoload-dev": {
