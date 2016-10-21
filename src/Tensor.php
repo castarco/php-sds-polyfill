@@ -52,6 +52,14 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         return $slice;
     }
 
+    /**
+     * @return \int[]
+     */
+    public function getShape() : array
+    {
+        return $this->shape->toArray();
+    }
+
     // -----------------------------------------------------------------------------------------------------------------
     // Abstract methods:
     // -----------------------------------------------------------------------------------------------------------------
@@ -69,14 +77,14 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
     {
         $mod = (2 << 61);
 
-        $hash = (31       + count($this->shape)) % $mod;
-        $hash = (37*$hash + count($this->data))  % $mod;
+        $hash = (31       + \count($this->shape)) % $mod;
+        $hash = (37*$hash + \count($this->data))  % $mod;
 
         foreach ($this->shape as $dimWidth) {
             $hash = (41*$hash + $dimWidth) % $mod;
         }
         foreach ($this->data as $cell) {
-            $hash = (43*$hash + (int)floor($cell)) % $mod;
+            $hash = (43*$hash + (int)\floor($cell)) % $mod;
         }
 
         return $hash;
@@ -90,7 +98,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         return (
             $obj === $this ||
             (
-                get_class($obj) === get_class($this) &&
+                \get_class($obj) === \get_class($this) &&
                 $obj->shape->toArray() === $this->shape->toArray() &&
                 $obj->data->toArray()  === $this->data->toArray()
             )
@@ -122,7 +130,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
 
     protected function _offsetExists(int ...$offset) : bool
     {
-        if (count($offset) !== count($this->shape)) {
+        if (\count($offset) !== \count($this->shape)) {
             return false;
         }
 
@@ -138,7 +146,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
 
     protected function getInternalIndex (int ...$offset) : int
     {
-        if (count($offset) !== count($this->shape)) {
+        if (\count($offset) !== \count($this->shape)) {
             throw new ShapeMismatchException('Unexpected number of dimensions on the coordinates');
         }
 
@@ -148,8 +156,8 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
             }
         }
 
-        return (int)array_sum(
-            array_map(
+        return (int)\array_sum(
+            \array_map(
                 'SDS\functions\iMultiply',
                 $offset,
                 $this->indexShifts
@@ -165,7 +173,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
      */
     public function count() : int
     {
-        return count($this->data);
+        return \count($this->data);
     }
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -187,10 +195,10 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
     protected function setShape(Vector $shape)
     {
         $this->shape       = $shape;
-        $this->indexShifts = array_fill(0, count($this->shape), 0);
+        $this->indexShifts = \array_fill(0, count($this->shape), 0);
 
         $v = 1;
-        for ($i=count($shape)-1; $i >= 0; $i--) {
+        for ($i=\count($shape)-1; $i >= 0; $i--) {
             $this->indexShifts[$i] = $v;
             $v *= $shape[$i];
         }
@@ -205,9 +213,9 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         foreach ($sliceSpec as $dimIndex => $sComp) {
             if (null === $sComp) {
                 $shape[] = $this->shape[$dimIndex];
-            } elseif ($keepRedundantDims && is_int($sComp)) {
+            } elseif ($keepRedundantDims && \is_int($sComp)) {
                 $shape[] = 1;
-            } elseif (is_array($sComp)) {
+            } elseif (\is_array($sComp)) {
                 $shape[] = 1 + $sComp[1] - $sComp[0];
             }
         }
@@ -218,9 +226,9 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
     protected function getInternalSlicesToBeCopied(array $sliceSpec) : array
     {
         $normalizedSliceSpec = $this->getNormalizedSliceSpec($sliceSpec);
-        $internalSlices = [[0, count($this->data)-1]];
+        $internalSlices = [[0, \count($this->data)-1]];
 
-        for ($i = 0; $i < count($this->shape); $i++) {
+        for ($i = 0; $i < \count($this->shape); $i++) {
             $tmpInternalSlices = [];
 
             foreach ($internalSlices as $internalSlice) {
@@ -240,25 +248,25 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
 
     private function checkSliceSpec(array $sliceSpec)
     {
-        if (isAssociativeArray($sliceSpec) || count($sliceSpec) !== count($this->shape)) {
+        if (isAssociativeArray($sliceSpec) || \count($sliceSpec) !== \count($this->shape)) {
             throw new ShapeMismatchException();
         }
 
-        $nValidSlice = count(array_filter($sliceSpec, function ($sComp, $dimIndex) : bool {
+        $nValidSlice = \count(\array_filter($sliceSpec, function ($sComp, $dimIndex) : bool {
             return (
                 null === $sComp ||
 
-                is_int($sComp) && $sComp > 0 && $sComp < $this->shape[$dimIndex] ||
+                \is_int($sComp) && $sComp > 0 && $sComp < $this->shape[$dimIndex] ||
 
                 (
-                    is_array($sComp) && count($sComp) === 2 &&
-                    is_int($sComp[0]) && $sComp[0] >= 0 &&
-                    is_int($sComp[1]) && $sComp[1] > $sComp[0] && $sComp[1] < $this->shape[$dimIndex]
+                    \is_array($sComp) && \count($sComp) === 2 &&
+                    \is_int($sComp[0]) && $sComp[0] >= 0 &&
+                    \is_int($sComp[1]) && $sComp[1] > $sComp[0] && $sComp[1] < $this->shape[$dimIndex]
                 )
             );
         }, ARRAY_FILTER_USE_BOTH));
 
-        if ($nValidSlice !== count($this->shape)) {
+        if ($nValidSlice !== \count($this->shape)) {
             throw new ShapeMismatchException();
         }
     }
@@ -270,7 +278,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         foreach ($sliceSpec as $dimIndex => $sComp) {
             if (null === $sComp) {
                 $normalizedSliceSpec[] = [0, $this->shape[$dimIndex] - 1];
-            } elseif (is_int($sComp)) {
+            } elseif (\is_int($sComp)) {
                 $normalizedSliceSpec[] = [$sComp, $sComp];
             } else {
                 $normalizedSliceSpec[] = $sComp;
@@ -285,7 +293,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
     // -----------------------------------------------------------------------------------------------------------------
     static protected function checkShape(int ...$shape)
     {
-        if (count(array_filter($shape, 'SDS\functions\isPositive')) < count($shape)) {
+        if (\count(\array_filter($shape, 'SDS\functions\isPositive')) < \count($shape)) {
             throw new \InvalidArgumentException('Shape dimensions must have a strictly positive width');
         }
     }
