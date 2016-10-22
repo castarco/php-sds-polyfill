@@ -296,4 +296,18 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
             throw new \InvalidArgumentException('Shape dimensions must have a strictly positive width');
         }
     }
+
+    static protected function flattenNestedArray(array $data, int $levelSize) : array
+    {
+        $flatArray = [];
+
+        foreach ($data as $block) {
+            if (count($block) !== $levelSize) {
+                throw new ShapeMismatchException();
+            }
+            $flatArray = array_merge($flatArray, $block);
+        }
+
+        return $flatArray;
+    }
 }

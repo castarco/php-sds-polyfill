@@ -64,6 +64,44 @@ final class IntTensor extends Tensor
         return $t;
     }
 
+    static public function fromArray(array $source, array $shape = null) : IntTensor
+    {
+        if (null !== $shape) {
+            return self::fromArrayWithForcedShape($shape, ...$source);
+        } else {
+            return self::fromArrayWithInferredShape($source);
+        }
+    }
+
+    static private function fromArrayWithForcedShape(array $shape, int ...$source) : IntTensor
+    {
+        self::checkShape(...$shape);
+        if (array_iMul(...$shape) !== count($source)) {
+            throw new ShapeMismatchException();
+        }
+
+        $t = new IntTensor();
+        $t->setShape(new Vector($shape));
+        $t->data = new Vector($source);
+
+        return $t;
+    }
+
+    static private function fromArrayWithInferredShape(array $source) : IntTensor
+    {
+        $shape = [];
+        $data = $source;
+
+        for ($i=$source; is_array($i); $i=$i[0]) {
+            $shape[] = count($i);
+            if (is_array($i[0])) {
+                $data = self::flattenNestedArray($data, count($i));
+            }
+        }
+
+        return self::fromArrayWithForcedShape($shape, ...$data);
+    }
+
     // -----------------------------------------------------------------------------------------------------------------
     // \ArrayAccess methods:
     // -----------------------------------------------------------------------------------------------------------------
