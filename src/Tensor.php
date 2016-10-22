@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace SDS;
 
 
-use Ds\Hashable;
-use Ds\Vector;
+use Ds\{Hashable, Vector};
 
 use SDS\Exceptions\ShapeMismatchException;
 use function SDS\functions\ {

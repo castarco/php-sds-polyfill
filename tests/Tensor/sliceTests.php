@@ -14,6 +14,10 @@ class sliceTests extends TestCase
 {
     /**
      * @covers \SDS\Tensor::slice
+     * @covers \SDS\Tensor::checkSliceSpec
+     * @covers \SDS\Tensor::getNormalizedSliceSpec
+     * @covers \SDS\Tensor::getShapeFromSliceSpec
+     * @covers \SDS\Tensor::getInternalSlicesToBeCopied
      */
     public function test()
     {

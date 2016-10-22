@@ -15,6 +15,7 @@ class __constructTests extends TestCase
      * @covers \SDS\FloatTensor::__construct
      * @covers \SDS\FloatTensor::initWithConstant
      * @covers \SDS\Tensor::__construct
+     * @covers \SDS\Tensor::checkShape
      * @covers \SDS\Tensor::setShape
      */
     public function test_constructor_determinism()
@@ -44,6 +45,7 @@ class __constructTests extends TestCase
     /**
      * @covers \SDS\FloatTensor::__construct
      * @covers \SDS\Tensor::__construct
+     * @covers \SDS\Tensor::checkShape
      *
      * @expectedException \InvalidArgumentException
      * @expectedExceptionMessage Shape dimensions must have a strictly positive width
