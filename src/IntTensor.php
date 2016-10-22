@@ -7,6 +7,7 @@ namespace SDS;
 
 use Ds\Vector;
 
+use SDS\Exceptions\ShapeMismatchException;
 use function SDS\functions\ {
     array_iMul
 };
@@ -95,7 +96,11 @@ final class IntTensor extends Tensor
      */
     public function offsetSet($offset, $value)
     {
-        $this->set($value, $offset);
+        if ($value instanceof IntTensor) {
+            $this->setSlice($value, $offset);
+        } else {
+            $this->set($value, $offset);
+        }
     }
 
     /**
@@ -105,6 +110,22 @@ final class IntTensor extends Tensor
     public function set(int $value, array $offset)
     {
         $this->data[$this->getInternalIndex(...$offset)] = $value;
+    }
+
+    public function setSlice(IntTensor $t, array $sliceSpec)
+    {
+        $targetSliceShape = $this->getShapeFromSliceSpec($sliceSpec, true);
+
+        if ($targetSliceShape->toArray() !== $t->shape->toArray()) {
+            throw new ShapeMismatchException();
+        }
+
+        $dataIndex = 0;
+        foreach ($this->getInternalSlicesToBeCopied($sliceSpec) as $sliceToBeCopied) {
+            for ($i=$sliceToBeCopied[0]; $i <= $sliceToBeCopied[1]; $i++) {
+                $this->data[$i] = $t->data[$dataIndex++];
+            }
+        }
     }
 
     // -----------------------------------------------------------------------------------------------------------------

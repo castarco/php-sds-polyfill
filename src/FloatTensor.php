@@ -96,7 +96,11 @@ final class FloatTensor extends Tensor
      */
     public function offsetSet($offset, $value)
     {
-        $this->set($value, $offset);
+        if ($value instanceof Tensor) {
+            $this->setSlice($value, $offset);
+        } else {
+            $this->set($value, $offset);
+        }
     }
 
     /**
@@ -108,7 +112,7 @@ final class FloatTensor extends Tensor
         $this->data[$this->getInternalIndex(...$offset)] = $value;
     }
 
-    public function setSlice(FloatTensor $t, array $sliceSpec)
+    public function setSlice(Tensor $t, array $sliceSpec)
     {
         $targetSliceShape = $this->getShapeFromSliceSpec($sliceSpec, true);
 
@@ -119,7 +123,7 @@ final class FloatTensor extends Tensor
         $dataIndex = 0;
         foreach ($this->getInternalSlicesToBeCopied($sliceSpec) as $sliceToBeCopied) {
             for ($i=$sliceToBeCopied[0]; $i <= $sliceToBeCopied[1]; $i++) {
-                $this->data[$i] = $t->data[$dataIndex++];
+                $this->data[$i] = (float)$t->data[$dataIndex++];
             }
         }
     }
