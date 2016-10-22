@@ -1,5 +1,12 @@
 # PHP-SDS : Scientific Data Structures (polyfill)
 
+
+[![Author](http://img.shields.io/badge/author-@castarco-blue.svg?style=flat-square)](https://twitter.com/castarco)
+[![Build Status](https://img.shields.io/travis/SciPHPy/php-sds-polyfill/master.svg?style=flat-square)](https://travis-ci.org/SciPHPy/php-sds-polyfill)
+[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
+[![Packagist Version](https://img.shields.io/packagist/v/SciPHPy/php-sds-polyfill.svg?style=flat-square)](https://packagist.org/packages/SciPHPy/php-sds-polyfill)
+[![Total Downloads](https://img.shields.io/packagist/dt/SciPHPy/php-sds-polyfill.svg?style=flat-square)](https://packagist.org/packages/SciPHPy/php-sds-polyfill)
+
 This library is a pure and complete PHP replacement for the native SDS extension (Scientific Data Structures). This
 package is slower than its native counterpart, but it's useful to ensure compatibility with systems where no extensions
 can be installed.
