@@ -183,7 +183,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
      */
     public function getIterator() : \Traversable
     {
-        return $this->data->getIterator();
+        return $this->data;
     }
 
     // -----------------------------------------------------------------------------------------------------------------
