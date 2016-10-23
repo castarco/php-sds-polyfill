@@ -8,7 +8,17 @@ matrix:
   fast_finish: true
   include:
     - php: 7.0
+      env:
+        - DS_EXTENSION=
     - php: nightly
+      env:
+        - DS_EXTENSION=
+    - php: 7.0
+      env:
+        - DS_EXTENSION=ds
+    - php: nightly
+      env:
+        - DS_EXTENSION=ds
     - php: hhvm-3.15
   allow_failures:
     - php: hhvm-3.15
@@ -19,6 +29,7 @@ before_install:
   - bash -c 'chmod +x bin/composer.phar'
 
 install:
+  - travis_retry bash -c 'if [ "$DS_EXTENSION" == "ds" ]; then yes "" | pecl -q install -f ds; fi;'
   - travis_retry ./bin/composer.phar install -o --no-interaction --prefer-source
 
 script:
