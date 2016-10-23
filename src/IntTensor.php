@@ -67,13 +67,13 @@ final class IntTensor extends Tensor
     static public function fromArray(array $source, array $shape = null) : IntTensor
     {
         if (null !== $shape) {
-            return self::fromArrayWithForcedShape($shape, ...$source);
+            return static::fromArrayWithForcedShape($shape, ...$source);
         } else {
-            return self::fromArrayWithInferredShape($source);
+            return static::fromArrayWithInferredShape($source);
         }
     }
 
-    static private function fromArrayWithForcedShape(array $shape, int ...$source) : IntTensor
+    static protected function fromArrayWithForcedShape(array $shape, int ...$source) : IntTensor
     {
         self::checkShape(...$shape);
         if (array_iMul(...$shape) !== count($source)) {
@@ -85,21 +85,6 @@ final class IntTensor extends Tensor
         $t->data = new Vector($source);
 
         return $t;
-    }
-
-    static private function fromArrayWithInferredShape(array $source) : IntTensor
-    {
-        $shape = [];
-        $data = $source;
-
-        for ($i=$source; is_array($i); $i=$i[0]) {
-            $shape[] = count($i);
-            if (is_array($i[0])) {
-                $data = self::flattenNestedArray($data, count($i));
-            }
-        }
-
-        return self::fromArrayWithForcedShape($shape, ...$data);
     }
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -136,6 +121,18 @@ final class IntTensor extends Tensor
     {
         if ($value instanceof IntTensor) {
             $this->setSlice($value, $offset);
+        } elseif (is_array($value) && count($value) > 0) {
+            if (is_int($value[0])) {
+                $this->setSlice(
+                    IntTensor::fromArray($value, self::getShapeFromSliceSpec($offset, true)->toArray()),
+                    $offset
+                );
+            } else {
+                $this->setSlice(
+                    IntTensor::fromArray($value),
+                    $offset
+                );
+            }
         } else {
             $this->set($value, $offset);
         }

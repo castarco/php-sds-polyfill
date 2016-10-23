@@ -310,4 +310,19 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
 
         return $flatArray;
     }
+
+    static protected function fromArrayWithInferredShape(array $source) : Tensor
+    {
+        $shape = [];
+        $data = $source;
+
+        for ($i=$source; is_array($i); $i=$i[0]) {
+            $shape[] = count($i);
+            if (is_array($i[0])) {
+                $data = static::flattenNestedArray($data, count($i));
+            }
+        }
+
+        return static::fromArrayWithForcedShape($shape, ...$data);
+    }
 }

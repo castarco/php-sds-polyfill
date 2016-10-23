@@ -64,6 +64,29 @@ final class FloatTensor extends Tensor
         return $t;
     }
 
+    static public function fromArray(array $source, array $shape = null) : FloatTensor
+    {
+        if (null !== $shape) {
+            return self::fromArrayWithForcedShape($shape, ...$source);
+        } else {
+            return self::fromArrayWithInferredShape($source);
+        }
+    }
+
+    static protected function fromArrayWithForcedShape(array $shape, float ...$source) : FloatTensor
+    {
+        self::checkShape(...$shape);
+        if (array_iMul(...$shape) !== count($source)) {
+            throw new ShapeMismatchException();
+        }
+
+        $t = new FloatTensor();
+        $t->setShape(new Vector($shape));
+        $t->data = new Vector($source);
+
+        return $t;
+    }
+
     // -----------------------------------------------------------------------------------------------------------------
     // \ArrayAccess methods:
     // -----------------------------------------------------------------------------------------------------------------
@@ -98,6 +121,18 @@ final class FloatTensor extends Tensor
     {
         if ($value instanceof Tensor) {
             $this->setSlice($value, $offset);
+        } elseif (is_array($value) && count($value) > 0) {
+            if (is_float($value[0]) || is_int($value[0])) {
+                $this->setSlice(
+                    FloatTensor::fromArray($value, self::getShapeFromSliceSpec($offset, true)->toArray()),
+                    $offset
+                );
+            } else {
+                $this->setSlice(
+                    FloatTensor::fromArray($value),
+                    $offset
+                );
+            }
         } else {
             $this->set($value, $offset);
         }

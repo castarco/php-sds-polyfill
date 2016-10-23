@@ -67,4 +67,46 @@ class setSliceTests extends TestCase
         $this->assertEquals(1, $t1[[2, 1]]);
         $this->assertEquals(1, $t1[[2, 2]]);
     }
+
+    /**
+     * @covers \SDS\IntTensor::offsetSet
+     * @covers \SDS\IntTensor::setSlice
+     */
+    public function test_with_ArrayAccess_idiom_and_array_param()
+    {
+        $t1 = IntTensor::zeros([3, 3]);
+
+        $t1[[[1, 2], [1, 2]]] = [[1, 1], [1, 1]];
+
+        $this->assertEquals(0, $t1[[0, 0]]);
+        $this->assertEquals(0, $t1[[0, 1]]);
+        $this->assertEquals(0, $t1[[0, 2]]);
+        $this->assertEquals(0, $t1[[1, 0]]);
+        $this->assertEquals(0, $t1[[2, 0]]);
+        $this->assertEquals(1, $t1[[1, 1]]);
+        $this->assertEquals(1, $t1[[1, 2]]);
+        $this->assertEquals(1, $t1[[2, 1]]);
+        $this->assertEquals(1, $t1[[2, 2]]);
+    }
+
+    /**
+     * @covers \SDS\IntTensor::offsetSet
+     * @covers \SDS\IntTensor::setSlice
+     */
+    public function test_with_ArrayAccess_idiom_and_flat_array_param()
+    {
+        $t1 = IntTensor::zeros([3, 3]);
+
+        $t1[[[1, 2], [1, 2]]] = [1, 1, 1, 1];
+
+        $this->assertEquals(0, $t1[[0, 0]]);
+        $this->assertEquals(0, $t1[[0, 1]]);
+        $this->assertEquals(0, $t1[[0, 2]]);
+        $this->assertEquals(0, $t1[[1, 0]]);
+        $this->assertEquals(0, $t1[[2, 0]]);
+        $this->assertEquals(1, $t1[[1, 1]]);
+        $this->assertEquals(1, $t1[[1, 2]]);
+        $this->assertEquals(1, $t1[[2, 1]]);
+        $this->assertEquals(1, $t1[[2, 2]]);
+    }
 }
