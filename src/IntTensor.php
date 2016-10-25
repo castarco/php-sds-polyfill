@@ -9,7 +9,8 @@ use Ds\Vector;
 
 use SDS\Exceptions\ShapeMismatchException;
 use function SDS\functions\ {
-    array_iMul
+    array_iMul,
+    randBinomial
 };
 
 
@@ -77,6 +78,24 @@ final class IntTensor extends Tensor
 
         for ($i=0; $i<$dataSize; $i++) {
             $t->data->push(rand($minL, $maxL));
+        }
+
+        return $t;
+    }
+
+    static public function randomBinomial(int $n, array $shape) : IntTensor
+    {
+        self::checkShape(...$shape);
+
+        $t = new IntTensor();
+        $t->setShape(new Vector($shape));
+
+        $dataSize = array_iMul(...$shape);
+        $t->data = new Vector();
+        $t->data->allocate($dataSize);
+
+        for ($i=0; $i<$dataSize; $i++) {
+            $t->data->push(randBinomial($n));
         }
 
         return $t;
