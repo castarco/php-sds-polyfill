@@ -64,6 +64,25 @@ final class FloatTensor extends Tensor
         return $t;
     }
 
+    static public function randomUniform(float $minL, float $maxL, array $shape) : FloatTensor
+    {
+        self::checkShape(...$shape);
+
+        $t = new FloatTensor();
+        $t->setShape(new Vector($shape));
+
+        $dataSize = array_iMul(...$shape);
+        $t->data = new Vector();
+        $t->data->allocate($dataSize);
+
+        $factor = ($maxL-$minL)/getrandmax();
+        for ($i=0; $i<$dataSize; $i++) {
+            $t->data->push(rand()*$factor + $minL);
+        }
+
+        return $t;
+    }
+
     static public function fromArray(array $source, array $shape = null) : FloatTensor
     {
         if (null !== $shape) {

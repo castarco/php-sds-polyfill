@@ -64,6 +64,24 @@ final class IntTensor extends Tensor
         return $t;
     }
 
+    static public function randomUniform(int $minL, int $maxL, array $shape) : IntTensor
+    {
+        self::checkShape(...$shape);
+
+        $t = new IntTensor();
+        $t->setShape(new Vector($shape));
+
+        $dataSize = array_iMul(...$shape);
+        $t->data = new Vector();
+        $t->data->allocate($dataSize);
+
+        for ($i=0; $i<$dataSize; $i++) {
+            $t->data->push(rand($minL, $maxL));
+        }
+
+        return $t;
+    }
+
     static public function fromArray(array $source, array $shape = null) : IntTensor
     {
         if (null !== $shape) {
