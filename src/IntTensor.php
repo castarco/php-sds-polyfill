@@ -200,21 +200,6 @@ final class IntTensor extends Tensor
     // Core PHP interfaces methods
     // -----------------------------------------------------------------------------------------------------------------
     /**
-     * Offset to retrieve
-     * @link http://php.net/manual/en/arrayaccess.offsetget.php
-     * @param int[] $offset The offset to retrieve.
-     * @return int|IntTensor
-     */
-    public function offsetGet($offset)
-    {
-        try {
-            return $this->get(...$offset);
-        } catch (\TypeError $te) {
-            return $this->slice($offset);
-        }
-    }
-
-    /**
      * Offset to set
      * @link http://php.net/manual/en/arrayaccess.offsetset.php
      * @param int[] $offset The offset to assign the value to.

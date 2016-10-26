@@ -55,6 +55,28 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
     }
 
     /**
+     * @param callable $fn
+     */
+    public function apply(callable $fn)
+    {
+        $this->data->apply($fn);
+    }
+
+    /**
+     * @param callable $fn
+     * @return Tensor
+     */
+    public function map(callable $fn) : Tensor
+    {
+        $t = new static();
+        $t->shape       = $this->shape;
+        $t->indexShifts = $this->indexShifts;
+        $t->data        = $this->data->map($fn);
+
+        return $t;
+    }
+
+    /**
      * @param int[] ...$offset
      * @return int|float
      */
@@ -336,6 +358,21 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
             return $this->_offsetExists(...$offset);
         } catch (\Throwable $t) {
             return false;
+        }
+    }
+
+    /**
+     * Offset to retrieve
+     * @link http://php.net/manual/en/arrayaccess.offsetget.php
+     * @param int[] $offset The offset to retrieve.
+     * @return int|float|FloatTensor|IntTensor
+     */
+    public function offsetGet($offset)
+    {
+        try {
+            return $this->get(...$offset);
+        } catch (\TypeError $te) {
+            return $this->slice($offset);
         }
     }
 

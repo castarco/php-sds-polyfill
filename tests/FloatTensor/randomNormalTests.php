@@ -63,7 +63,7 @@ class randomBinomialTests extends TestCase
         }
         $acc /= 1024.;
 
-        $this->assertEquals($center, $acc, '', 0.08);
+        $this->assertEquals($center, $acc, '', 0.09);
     }
 
     /**
