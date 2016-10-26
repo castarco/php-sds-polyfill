@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 class __constructTests extends TestCase
 {
     /**
-     * @covers \SDS\FloatTensor::__construct
+     * @covers \SDS\FloatTensor::zeros
      * @covers \SDS\FloatTensor::initWithConstant
      * @covers \SDS\Tensor::__construct
      * @covers \SDS\Tensor::checkShape
@@ -43,7 +43,7 @@ class __constructTests extends TestCase
     }
 
     /**
-     * @covers \SDS\FloatTensor::__construct
+     * @covers \SDS\FloatTensor::zeros
      * @covers \SDS\Tensor::__construct
      * @covers \SDS\Tensor::checkShape
      *

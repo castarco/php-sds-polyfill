@@ -16,26 +16,29 @@ use function SDS\functions\ {
 
 abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, Hashable
 {
-    /** @var \int[]|Vector */
+    /** @var int[] */
     protected $shape;
 
-    /** @var \int[]|Vector */
+    /** @var int[] */
     protected $indexShifts;
 
-    /** @var \int[]|\float[]|Vector */
+    /** @var int[]|float[]|Vector */
     protected $data;
 
-
-    // -----------------------------------------------------------------------------------------------------------------
-    // Public methods:
-    // -----------------------------------------------------------------------------------------------------------------
-    public function __clone()
+    /**
+     * @return int[]
+     */
+    public function getShape() : array
     {
-        $this->shape = clone $this->shape;
-        $this->data  = clone $this->data;
+        return $this->shape;
     }
 
-    public function slice(array $sliceSpec, $keepRedundantDims=false) : Tensor
+    /**
+     * @param (null|int|int[])[] $sliceSpec
+     * @param bool $keepRedundantDims
+     * @return Tensor
+     */
+    public function slice(array $sliceSpec, $keepRedundantDims = false) : Tensor
     {
         $slice = new static();
         $slice->setShape($this->getShapeFromSliceSpec($sliceSpec, $keepRedundantDims));
@@ -52,97 +55,26 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
     }
 
     /**
-     * @return \int[]
+     * @param int[] ...$offset
+     * @return int|float
      */
-    public function getShape() : array
-    {
-        return $this->shape->toArray();
-    }
-
-    // -----------------------------------------------------------------------------------------------------------------
-    // Abstract methods:
-    // -----------------------------------------------------------------------------------------------------------------
-    abstract public function get(int ...$offset);
-
-    abstract protected function initWithConstant($c = 0);
-
-    // -----------------------------------------------------------------------------------------------------------------
-    // Ds\Hashable methods:
-    // -----------------------------------------------------------------------------------------------------------------
-    /**
-     * @inheritdoc
-     */
-    public function hash() : int
-    {
-        $mod = (2 << 61);
-
-        $hash = (31       + \count($this->shape)) % $mod;
-        $hash = (37*$hash + \count($this->data))  % $mod;
-
-        foreach ($this->shape as $dimWidth) {
-            $hash = (41*$hash + $dimWidth) % $mod;
-        }
-        foreach ($this->data as $cell) {
-            $hash = (43*$hash + (int)\floor($cell)) % $mod;
-        }
-
-        return $hash;
-    }
+    public abstract function get(int ...$offset);
 
     /**
-     * @inheritdoc
+     * Tensor constructor.
      */
-    public function equals($obj) : bool
-    {
-        return (
-            $obj === $this ||
-            (
-                \get_class($obj) === \get_class($this) &&
-                $obj->shape->toArray() === $this->shape->toArray() &&
-                $obj->data->toArray()  === $this->data->toArray()
-            )
-        );
-    }
-
-    // -----------------------------------------------------------------------------------------------------------------
-    // \ArrayAccess methods:
-    // -----------------------------------------------------------------------------------------------------------------
-    /**
-     * @inheritdoc
-     */
-    public function offsetExists($offset) : bool
-    {
-        try {
-            return $this->_offsetExists(...$offset);
-        } catch (\Throwable $t) {
-            return false;
-        }
-    }
+    protected function __construct() { }
 
     /**
-     * @inheritdoc
+     * @param int|float $c
+     * @return void
      */
-    public function offsetUnset($offset)
-    {
-        throw new \BadMethodCallException('Not supported operation');
-    }
+    protected abstract function initWithConstant($c = 0);
 
-    protected function _offsetExists(int ...$offset) : bool
-    {
-        if (\count($offset) !== \count($this->shape)) {
-            return false;
-        }
-
-        foreach ($this->shape as $dimIndex => $dimWidth) {
-            // We allow negative indexes
-            if ($offset[$dimIndex] >= $dimWidth || $offset[$dimIndex] < -$dimWidth) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
+    /**
+     * @param int[] ...$offset
+     * @return int
+     */
     protected function getInternalIndex (int ...$offset) : int
     {
         if (\count($offset) !== \count($this->shape)) {
@@ -164,34 +96,10 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         );
     }
 
-    // -----------------------------------------------------------------------------------------------------------------
-    // \Countable methods:
-    // -----------------------------------------------------------------------------------------------------------------
     /**
-     * @inheritdoc
+     * @param int[] $shape
      */
-    public function count() : int
-    {
-        return \count($this->data);
-    }
-
-    // -----------------------------------------------------------------------------------------------------------------
-    // \IteratorAggregate methods:
-    // -----------------------------------------------------------------------------------------------------------------
-    /**
-     * @inheritdoc
-     */
-    public function getIterator() : \Traversable
-    {
-        return $this->data;
-    }
-
-    // -----------------------------------------------------------------------------------------------------------------
-    // Tensor's protected/private methods
-    // -----------------------------------------------------------------------------------------------------------------
-    protected function __construct() { }
-
-    protected function setShape(Vector $shape)
+    protected function setShape(array $shape)
     {
         $this->shape       = $shape;
         $this->indexShifts = \array_fill(0, count($this->shape), 0);
@@ -203,7 +111,12 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         }
     }
 
-    protected function getShapeFromSliceSpec(array $sliceSpec, bool $keepRedundantDims=false) : Vector
+    /**
+     * @param (null|int|int[])[] $sliceSpec
+     * @param bool $keepRedundantDims
+     * @return int[]
+     */
+    protected function getShapeFromSliceSpec(array $sliceSpec, bool $keepRedundantDims=false) : array
     {
         $this->checkSliceSpec($sliceSpec);
 
@@ -219,9 +132,13 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
             }
         }
 
-        return new Vector($shape);
+        return $shape;
     }
 
+    /**
+     * @param (null|int|int[])[] $sliceSpec
+     * @return int[][]
+     */
     protected function getInternalSlicesToBeCopied(array $sliceSpec) : array
     {
         $normalizedSliceSpec = $this->getNormalizedSliceSpec($sliceSpec);
@@ -245,6 +162,40 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         return $internalSlices;
     }
 
+    /**
+     * @param int[] ...$shape
+     * @throws \InvalidArgumentException
+     */
+    protected static function checkShape(int ...$shape)
+    {
+        if (\count(\array_filter($shape, 'SDS\functions\isPositive')) < \count($shape)) {
+            throw new \InvalidArgumentException('Shape dimensions must have a strictly positive width');
+        }
+    }
+
+    /**
+     * @param array[] $source
+     * @return Tensor
+     */
+    protected static function fromArrayWithInferredShape(array $source) : Tensor
+    {
+        $shape = [];
+        $data = $source;
+
+        for ($i=$source; is_array($i); $i=$i[0]) {
+            $shape[] = count($i);
+            if (is_array($i[0])) {
+                $data = static::flattenNestedArray($data, count($i));
+            }
+        }
+
+        return static::fromArrayWithForcedShape($shape, ...$data);
+    }
+
+    /**
+     * @param (null|int|int[])[] $sliceSpec
+     * @throws ShapeMismatchException
+     */
     private function checkSliceSpec(array $sliceSpec)
     {
         if (isAssociativeArray($sliceSpec) || \count($sliceSpec) !== \count($this->shape)) {
@@ -270,6 +221,10 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         }
     }
 
+    /**
+     * @param (null|int|int[])[] $sliceSpec
+     * @return int[][]
+     */
     private function getNormalizedSliceSpec(array $sliceSpec) : array
     {
         $normalizedSliceSpec = [];
@@ -287,17 +242,32 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         return $normalizedSliceSpec;
     }
 
-    // -----------------------------------------------------------------------------------------------------------------
-    // Tensor's static methods
-    // -----------------------------------------------------------------------------------------------------------------
-    static protected function checkShape(int ...$shape)
+    /**
+     * @param int[] ...$offset
+     * @return bool
+     */
+    private function _offsetExists(int ...$offset) : bool
     {
-        if (\count(\array_filter($shape, 'SDS\functions\isPositive')) < \count($shape)) {
-            throw new \InvalidArgumentException('Shape dimensions must have a strictly positive width');
+        if (\count($offset) !== \count($this->shape)) {
+            return false;
         }
+
+        foreach ($this->shape as $dimIndex => $dimWidth) {
+            // We allow negative indexes
+            if ($offset[$dimIndex] >= $dimWidth || $offset[$dimIndex] < -$dimWidth) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    static protected function flattenNestedArray(array $data, int $levelSize) : array
+    /**
+     * @param array $data
+     * @param int $levelSize
+     * @return int[]|float[]
+     */
+    private static function flattenNestedArray(array $data, int $levelSize) : array
     {
         $flatArray = [];
 
@@ -311,18 +281,85 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         return $flatArray;
     }
 
-    static protected function fromArrayWithInferredShape(array $source) : Tensor
+    // -----------------------------------------------------------------------------------------------------------------
+    // Core PHP interfaces methods
+    // -----------------------------------------------------------------------------------------------------------------
+    /**
+     * @inheritdoc
+     */
+    public function __clone()
     {
-        $shape = [];
-        $data = $source;
+        $this->data  = clone $this->data;
+    }
 
-        for ($i=$source; is_array($i); $i=$i[0]) {
-            $shape[] = count($i);
-            if (is_array($i[0])) {
-                $data = static::flattenNestedArray($data, count($i));
-            }
+    /**
+     * @inheritdoc
+     */
+    public function equals($obj) : bool
+    {
+        return (
+            $obj === $this ||
+            (
+                \get_class($obj) === \get_class($this) &&
+                $obj->shape === $this->shape &&
+                $obj->data->toArray()  === $this->data->toArray()
+            )
+        );
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function hash() : int
+    {
+        $mod = (2 << 61);
+
+        $hash = (31       + \count($this->shape)) % $mod;
+        $hash = (37*$hash + \count($this->data))  % $mod;
+
+        foreach ($this->shape as $dimWidth) {
+            $hash = (41*$hash + $dimWidth) % $mod;
+        }
+        foreach ($this->data as $cell) {
+            $hash = (43*$hash + (int)\floor($cell)) % $mod;
         }
 
-        return static::fromArrayWithForcedShape($shape, ...$data);
+        return $hash;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function offsetExists($offset) : bool
+    {
+        try {
+            return $this->_offsetExists(...$offset);
+        } catch (\Throwable $t) {
+            return false;
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function offsetUnset($offset)
+    {
+        throw new \BadMethodCallException('Not supported operation');
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function count() : int
+    {
+        return \count($this->data);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getIterator() : \Traversable
+    {
+        return $this->data;
     }
 }

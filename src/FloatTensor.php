@@ -19,30 +19,30 @@ final class FloatTensor extends Tensor
     // Static factories:
     // -----------------------------------------------------------------------------------------------------------------
     /**
-     * @param \int[] $shape
+     * @param int[] $shape
      * @return FloatTensor
      */
-    static public function zeros (array $shape) : FloatTensor
+    public static function zeros (array $shape) : FloatTensor
     {
         self::checkShape(...$shape);
 
         $t = new FloatTensor();
-        $t->setShape(new Vector($shape));
+        $t->setShape($shape);
         $t->initWithConstant(0.0);
 
         return $t;
     }
 
     /**
-     * @param \int[] $shape
+     * @param int[] $shape
      * @return FloatTensor
      */
-    static public function ones (array $shape) : FloatTensor
+    public static function ones (array $shape) : FloatTensor
     {
         self::checkShape(...$shape);
 
         $t = new FloatTensor();
-        $t->setShape(new Vector($shape));
+        $t->setShape($shape);
         $t->initWithConstant(1.0);
 
         return $t;
@@ -50,26 +50,32 @@ final class FloatTensor extends Tensor
 
     /**
      * @param float $c
-     * @param \int[] $shape
+     * @param int[] $shape
      * @return FloatTensor
      */
-    static public function constant (float $c, array $shape) : FloatTensor
+    public static function constant (float $c, array $shape) : FloatTensor
     {
         self::checkShape(...$shape);
 
         $t = new FloatTensor();
-        $t->setShape(new Vector($shape));
+        $t->setShape($shape);
         $t->initWithConstant($c);
 
         return $t;
     }
 
-    static public function randomUniform(array $shape, float $maxL = 1.0, float $minL = 0.0) : FloatTensor
+    /**
+     * @param int[] $shape
+     * @param float $maxL
+     * @param float $minL
+     * @return FloatTensor
+     */
+    public static function randomUniform(array $shape, float $maxL = 1.0, float $minL = 0.0) : FloatTensor
     {
         self::checkShape(...$shape);
 
         $t = new FloatTensor();
-        $t->setShape(new Vector($shape));
+        $t->setShape($shape);
 
         $dataSize = array_iMul(...$shape);
         $t->data = new Vector();
@@ -83,12 +89,18 @@ final class FloatTensor extends Tensor
         return $t;
     }
 
-    static public function randomNormal(array $shape, float $mu = 0.0, float $sigma = 1.0) : FloatTensor
+    /**
+     * @param int[] $shape
+     * @param float $mu
+     * @param float $sigma
+     * @return FloatTensor
+     */
+    public static function randomNormal(array $shape, float $mu = 0.0, float $sigma = 1.0) : FloatTensor
     {
         self::checkShape(...$shape);
 
         $t = new FloatTensor();
-        $t->setShape(new Vector($shape));
+        $t->setShape($shape);
 
         $dataSize = array_iMul(...$shape);
         $t->data = new Vector();
@@ -120,7 +132,12 @@ final class FloatTensor extends Tensor
         return $t;
     }
 
-    static public function fromArray(array $source, array $shape = null) : FloatTensor
+    /**
+     * @param float[]|array[] $source
+     * @param null|int[] $shape
+     * @return FloatTensor
+     */
+    public static function fromArray(array $source, array $shape = null) : FloatTensor
     {
         if (null !== $shape) {
             return self::fromArrayWithForcedShape($shape, ...$source);
@@ -129,85 +146,36 @@ final class FloatTensor extends Tensor
         }
     }
 
-    static protected function fromArrayWithForcedShape(array $shape, float ...$source) : FloatTensor
-    {
-        self::checkShape(...$shape);
-        if (array_iMul(...$shape) !== count($source)) {
-            throw new ShapeMismatchException();
-        }
-
-        $t = new FloatTensor();
-        $t->setShape(new Vector($shape));
-        $t->data = new Vector($source);
-
-        return $t;
-    }
-
     // -----------------------------------------------------------------------------------------------------------------
-    // \ArrayAccess methods:
+    // FloatTensor methods:
     // -----------------------------------------------------------------------------------------------------------------
     /**
-     * Offset to retrieve
-     * @link http://php.net/manual/en/arrayaccess.offsetget.php
-     * @param \int[] $offset The offset to retrieve.
-     * @return \float|FloatTensor
+     * @param int[] ...$offset
+     * @return float
      */
-    public function offsetGet($offset)
-    {
-        try {
-            return $this->get(...$offset);
-        } catch (\TypeError $te) {
-            return $this->slice($offset);
-        }
-    }
-
     public function get(int ...$offset) : float
     {
         return $this->data[$this->getInternalIndex(...$offset)];
     }
 
     /**
-     * Offset to set
-     * @link http://php.net/manual/en/arrayaccess.offsetset.php
-     * @param \int[] $offset The offset to assign the value to.
-     * @param \float $value The value to set.
-     * @return void
-     */
-    public function offsetSet($offset, $value)
-    {
-        if ($value instanceof Tensor) {
-            $this->setSlice($value, $offset);
-        } elseif (is_array($value) && count($value) > 0) {
-            if (is_float($value[0]) || is_int($value[0])) {
-                $this->setSlice(
-                    FloatTensor::fromArray($value, self::getShapeFromSliceSpec($offset, true)->toArray()),
-                    $offset
-                );
-            } else {
-                $this->setSlice(
-                    FloatTensor::fromArray($value),
-                    $offset
-                );
-            }
-        } else {
-            $this->set($value, $offset);
-        }
-    }
-
-    /**
-     * @param \float $value
-     * @param \int[] $offset
+     * @param float $value
+     * @param int[] $offset
      */
     public function set(float $value, array $offset)
     {
         $this->data[$this->getInternalIndex(...$offset)] = $value;
     }
 
+    /**
+     * @param Tensor $t
+     * @param (null|int|int[])[] $sliceSpec
+     */
     public function setSlice(Tensor $t, array $sliceSpec)
     {
         $targetSliceShape = $this->getShapeFromSliceSpec($sliceSpec, true);
 
-        if ($targetSliceShape->toArray() !== $t->shape->toArray()) {
+        if ($targetSliceShape !== $t->shape) {
             throw new ShapeMismatchException();
         }
 
@@ -219,13 +187,78 @@ final class FloatTensor extends Tensor
         }
     }
 
-    // -----------------------------------------------------------------------------------------------------------------
-    // Protected/Private methods:
-    // -----------------------------------------------------------------------------------------------------------------
+    /**
+     * @param float $c
+     */
     protected function initWithConstant($c = 0.0)
     {
         $this->data = new Vector(
             array_fill(0, array_iMul(...$this->shape), (float)$c)
         );
+    }
+
+    /**
+     * @param float[] $source
+     * @param int[] $shape
+     * @return FloatTensor
+     */
+    protected static function fromArrayWithForcedShape(array $shape, float ...$source) : FloatTensor
+    {
+        self::checkShape(...$shape);
+        if (array_iMul(...$shape) !== count($source)) {
+            throw new ShapeMismatchException();
+        }
+
+        $t = new FloatTensor();
+        $t->setShape($shape);
+        $t->data = new Vector($source);
+
+        return $t;
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Core PHP interfaces methods
+    // -----------------------------------------------------------------------------------------------------------------
+    /**
+     * Offset to retrieve
+     * @link http://php.net/manual/en/arrayaccess.offsetget.php
+     * @param int[] $offset The offset to retrieve.
+     * @return float|FloatTensor
+     */
+    public function offsetGet($offset)
+    {
+        try {
+            return $this->get(...$offset);
+        } catch (\TypeError $te) {
+            return $this->slice($offset);
+        }
+    }
+
+    /**
+     * Offset to set
+     * @link http://php.net/manual/en/arrayaccess.offsetset.php
+     * @param int[] $offset The offset to assign the value to.
+     * @param float $value The value to set.
+     * @return void
+     */
+    public function offsetSet($offset, $value)
+    {
+        if ($value instanceof Tensor) {
+            $this->setSlice($value, $offset);
+        } elseif (is_array($value) && count($value) > 0) {
+            if (is_float($value[0]) || is_int($value[0])) {
+                $this->setSlice(
+                    FloatTensor::fromArray($value, self::getShapeFromSliceSpec($offset, true)),
+                    $offset
+                );
+            } else {
+                $this->setSlice(
+                    FloatTensor::fromArray($value),
+                    $offset
+                );
+            }
+        } else {
+            $this->set($value, $offset);
+        }
     }
 }
