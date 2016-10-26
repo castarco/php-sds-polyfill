@@ -17,7 +17,7 @@ class randomUniformTests extends TestCase
      */
     public function test_bounds()
     {
-        $rT = IntTensor::randomUniform(0, 1000000, [3, 3]);
+        $rT = IntTensor::randomUniform([3, 3], 1000000, 0);
 
         $this->assertGreaterThanOrEqual(0, $rT[[0, 0]]);
         $this->assertGreaterThanOrEqual(0, $rT[[0, 1]]);
@@ -45,8 +45,8 @@ class randomUniformTests extends TestCase
      */
     public function test_randomness()
     {
-        $rT1 = IntTensor::randomUniform(0, 1000000, [3, 3]);
-        $rT2 = IntTensor::randomUniform(0, 1000000, [3, 3]);
+        $rT1 = IntTensor::randomUniform([3, 3], 1000000, 0);
+        $rT2 = IntTensor::randomUniform([3, 3], 1000000, 0);
 
         $this->assertFalse($rT1->equals($rT2));
         $this->assertFalse($rT2->equals($rT1));

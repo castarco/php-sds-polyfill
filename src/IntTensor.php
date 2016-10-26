@@ -65,7 +65,7 @@ final class IntTensor extends Tensor
         return $t;
     }
 
-    static public function randomUniform(int $minL, int $maxL, array $shape) : IntTensor
+    static public function randomUniform(array $shape, int $maxL = 1, int $minL = 0) : IntTensor
     {
         self::checkShape(...$shape);
 
@@ -83,7 +83,7 @@ final class IntTensor extends Tensor
         return $t;
     }
 
-    static public function randomBinomial(int $n, array $shape) : IntTensor
+    static public function randomBinomial(array $shape, int $n) : IntTensor
     {
         self::checkShape(...$shape);
 

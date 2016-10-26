@@ -17,7 +17,7 @@ class randomBinomialTests extends TestCase
      */
     public function test_bounds()
     {
-        $rT = IntTensor::randomBinomial(100, [3, 3]);
+        $rT = IntTensor::randomBinomial([3, 3], 100);
 
         $this->assertGreaterThanOrEqual(0, $rT[[0, 0]]);
         $this->assertGreaterThanOrEqual(0, $rT[[0, 1]]);
@@ -45,8 +45,8 @@ class randomBinomialTests extends TestCase
      */
     public function test_randomness()
     {
-        $rT1 = IntTensor::randomBinomial(1000, [3, 3]);
-        $rT2 = IntTensor::randomBinomial(1000, [3, 3]);
+        $rT1 = IntTensor::randomBinomial([3, 3], 1000);
+        $rT2 = IntTensor::randomBinomial([3, 3], 1000);
 
         $this->assertFalse($rT1->equals($rT2));
         $this->assertFalse($rT2->equals($rT1));

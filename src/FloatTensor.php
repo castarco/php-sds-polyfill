@@ -64,7 +64,7 @@ final class FloatTensor extends Tensor
         return $t;
     }
 
-    static public function randomUniform(float $minL, float $maxL, array $shape) : FloatTensor
+    static public function randomUniform(array $shape, float $maxL = 1.0, float $minL = 0.0) : FloatTensor
     {
         self::checkShape(...$shape);
 
@@ -78,6 +78,43 @@ final class FloatTensor extends Tensor
         $factor = ($maxL-$minL)/getrandmax();
         for ($i=0; $i<$dataSize; $i++) {
             $t->data->push(rand()*$factor + $minL);
+        }
+
+        return $t;
+    }
+
+    static public function randomNormal(array $shape, float $mu = 0.0, float $sigma = 1.0) : FloatTensor
+    {
+        self::checkShape(...$shape);
+
+        $t = new FloatTensor();
+        $t->setShape(new Vector($shape));
+
+        $dataSize = array_iMul(...$shape);
+        $t->data = new Vector();
+        $t->data->allocate($dataSize);
+
+        $divisor = getrandmax();
+        $two_pi  = 2.0 * 3.14159265358979323846;
+
+        // Box-Muller Transform
+        for ($i=0; $i<$dataSize; $i++) {
+            $u1 = rand() / $divisor;
+            $u2 = rand() / $divisor;
+
+            $z0 = $sigma * (sqrt(-2.0 * log($u1)) * cos($two_pi * $u2)) + $mu;
+            $z1 = sqrt(-2.0 * log($u1)) * sin($two_pi * $u2);
+
+            $t->data->push($z0);
+            $i++;
+
+            if ($i < $dataSize) {
+                // We do here the product to avoid doing it when it's not useful.
+                $t->data->push($sigma * $z1 + $mu);
+            } else {
+                // To avoid the extra comparison in the for loop "header".
+                break;
+            }
         }
 
         return $t;
