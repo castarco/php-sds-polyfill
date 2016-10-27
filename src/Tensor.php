@@ -9,6 +9,7 @@ use Ds\{Hashable, Vector};
 
 use SDS\Exceptions\ShapeMismatchException;
 use function SDS\functions\ {
+    array_iMul,
     isAssociativeArray,
     isPositive
 };
@@ -72,6 +73,67 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         $t->shape       = $this->shape;
         $t->indexShifts = $this->indexShifts;
         $t->data        = $this->data->map($fn);
+
+        return $t;
+    }
+
+    /**
+     * @param int[] $shape
+     * @param bool $inPlace
+     * @return Tensor
+     */
+    public function reshape(array $shape, bool $inPlace = false) : Tensor
+    {
+        self::checkShape(...$shape);
+
+        if (array_iMul(...$shape) !== array_iMul(...$this->shape)) {
+            throw new ShapeMismatchException();
+        }
+
+        $t = $inPlace ? $this : clone $this;
+        $t->shape = $shape;
+
+        return $t;
+    }
+
+    /**
+     * @param bool $inPlace
+     * @return Tensor
+     */
+    public function squeeze(bool $inPlace = false) : Tensor
+    {
+        $t = $inPlace ? $this : clone $this;
+        $t->shape = \array_values(\array_filter($t->shape, function (int $x) : bool {
+            return $x > 1;
+        }));
+
+        return $t;
+    }
+
+    /**
+     * @param int $position
+     * @param bool $inPlace
+     * @return Tensor
+     */
+    public function addDimension(int $position, bool $inPlace = false) : Tensor
+    {
+        if ($position < 0 || $position > count($this->shape)) {
+            throw new ShapeMismatchException();
+        }
+
+        $t = $inPlace ? $this : clone $this;
+
+        $shape = [];
+        for ($i=0; $i<count($this->shape); $i++) {
+            if ($i === $position) {
+                $shape[] = 1;
+            }
+            $shape[] = $this->shape[$i];
+        }
+        if ($i === $position) {
+            $shape[] = 1;
+        }
+        $t->shape = $shape;
 
         return $t;
     }
@@ -225,7 +287,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         for ($i = $source; is_array($i); $i = $i[0]) {
             $shape[] = count($i);
             if (is_array($i[0])) {
-                $data = static::flattenNestedArray($data, count($i));
+                $data = static::flattenNestedArray($data, count($i[0]));
             }
         }
 
