@@ -7,7 +7,9 @@ namespace SDS;
 
 use Ds\{Hashable, Vector};
 
+use SDS\Exceptions\InvalidPermutationException;
 use SDS\Exceptions\ShapeMismatchException;
+
 use function SDS\functions\ {
     array_iMul,
     isAssociativeArray,
@@ -167,6 +169,32 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
                 $this->shape
             )));
         } while (self::pointerUpdater($pointer, $newShape, $nDims));
+
+        return $t;
+    }
+
+    /**
+     * @param int[] $permutation
+     * @return Tensor
+     */
+    public function transpose(array $permutation) : Tensor
+    {
+        $this->checkPermutation(...$permutation);
+
+        $nDims = \count($this->shape);
+        $newShape = self::permute($this->shape, $permutation);
+        $pointer = \array_fill(0, $nDims, 0);
+
+        /** @var IntTensor|FloatTensor $t */
+        $t = clone $this;
+        $t->setShape($newShape);
+
+        do {
+            $t->set(
+                $this->get(...$pointer),
+                self::permute($pointer, $permutation)
+            );
+        } while (self::pointerUpdater($pointer, $this->shape, $nDims));
 
         return $t;
     }
@@ -378,6 +406,26 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
     }
 
     /**
+     * @param int[] ...$permutation
+     * @throws InvalidPermutationException
+     */
+    private function checkPermutation(int ...$permutation)
+    {
+        $nDims = \count($this->shape);
+        if (\count($permutation) !== $nDims) {
+            throw new InvalidPermutationException();
+        }
+
+        $checked = [];
+        foreach ($permutation as $pos) {
+            if ($pos < 0 || $pos >= $nDims || in_array($pos, $checked)) {
+                throw new InvalidPermutationException();
+            }
+            $checked[] = $pos;
+        }
+    }
+
+    /**
      * @param int[] ...$offset
      * @return bool
      */
@@ -436,6 +484,22 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         }
 
         return false;
+    }
+
+    /**
+     * @param array $arr
+     * @param int[] $permutation
+     * @return array
+     */
+    private static function permute(array $arr, array $permutation) : array
+    {
+        $result = [];
+
+        foreach ($permutation as $p) {
+            $result[] = $arr[$p];
+        }
+
+        return $result;
     }
 
     // -----------------------------------------------------------------------------------------------------------------
