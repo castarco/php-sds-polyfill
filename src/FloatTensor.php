@@ -192,7 +192,7 @@ final class FloatTensor extends Tensor
      * @param bool $inPlace
      * @return FloatTensor
      */
-    public function sum(Tensor $t, bool $inPlace = false) : FloatTensor
+    public function add(Tensor $t, bool $inPlace = false) : FloatTensor
     {
         if ($t->shape !== $this->shape) {
             throw new ShapeMismatchException();

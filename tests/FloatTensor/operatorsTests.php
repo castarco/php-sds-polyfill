@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 class operatorsTests extends TestCase
 {
     /**
-     * @covers \SDS\FloatTensor::sum
+     * @covers \SDS\FloatTensor::add
      */
     public function test_sum()
     {
@@ -28,7 +28,7 @@ class operatorsTests extends TestCase
             [7, 8, 9]
         ]);
 
-        $t3 = $t1->sum($t2);
+        $t3 = $t1->add($t2);
 
         $this->assertEquals(1, $t1[[0, 0]]);
         $this->assertEquals(2, $t1[[0, 1]]);
@@ -62,7 +62,7 @@ class operatorsTests extends TestCase
     }
 
     /**
-     * @covers \SDS\FloatTensor::sum
+     * @covers \SDS\FloatTensor::add
      */
     public function test_sum_inPlace()
     {
@@ -77,7 +77,7 @@ class operatorsTests extends TestCase
             [7, 8, 9]
         ]);
 
-        $t1->sum($t2, true);
+        $t1->add($t2, true);
 
         $this->assertEquals(2, $t1[[0, 0]]);
         $this->assertEquals(4, $t1[[0, 1]]);

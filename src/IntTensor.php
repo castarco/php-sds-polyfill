@@ -172,7 +172,7 @@ final class IntTensor extends Tensor
      * @param bool $inPlace
      * @return IntTensor
      */
-    public function sum(IntTensor $t, bool $inPlace = false) : IntTensor
+    public function add(IntTensor $t, bool $inPlace = false) : IntTensor
     {
         if ($t->shape !== $this->shape) {
             throw new ShapeMismatchException();
