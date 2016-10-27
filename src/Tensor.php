@@ -83,6 +83,13 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
     public abstract function get(int ...$offset);
 
     /**
+     * @param int[]|array[] $source
+     * @param (null|int|int[])[] $sliceSpec
+     * @return void
+     */
+    public abstract function setArrayAsSlice(array $source, array $sliceSpec);
+
+    /**
      * Tensor constructor.
      */
     protected function __construct() { }
@@ -201,17 +208,28 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
      */
     protected static function fromArrayWithInferredShape(array $source) : Tensor
     {
+        list($shape, $data) = self::inferShapeAndExtractData($source);
+
+        return static::fromArrayWithForcedShape($shape, ...$data);
+    }
+
+    /**
+     * @param array[] $source
+     * @return array
+     */
+    protected static function inferShapeAndExtractData(array $source) : array
+    {
         $shape = [];
         $data = $source;
 
-        for ($i=$source; is_array($i); $i=$i[0]) {
+        for ($i = $source; is_array($i); $i = $i[0]) {
             $shape[] = count($i);
             if (is_array($i[0])) {
                 $data = static::flattenNestedArray($data, count($i));
             }
         }
 
-        return static::fromArrayWithForcedShape($shape, ...$data);
+        return [$shape, $data];
     }
 
     /**

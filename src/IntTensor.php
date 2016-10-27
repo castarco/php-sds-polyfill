@@ -168,6 +168,35 @@ final class IntTensor extends Tensor
     }
 
     /**
+     * @param int[]|array[] $source
+     * @param (null|int|int[])[] $sliceSpec
+     * @return void
+     */
+    public function setArrayAsSlice(array $source, array $sliceSpec)
+    {
+        $targetSliceShape = $this->getShapeFromSliceSpec($sliceSpec, true);
+
+        if (is_int($source[0])) {
+            if (count($source) !== array_iMul(...$targetSliceShape)) {
+                throw new ShapeMismatchException();
+            }
+        } else {
+            list($srcShape, $source) = self::inferShapeAndExtractData($source);
+
+            if ($srcShape !== $targetSliceShape) {
+                throw new ShapeMismatchException();
+            }
+        }
+
+        $dataIndex = 0;
+        foreach ($this->getInternalSlicesToBeCopied($sliceSpec) as $sliceToBeCopied) {
+            for ($i=$sliceToBeCopied[0]; $i <= $sliceToBeCopied[1]; $i++) {
+                $this->data[$i] = (int)$source[$dataIndex++];
+            }
+        }
+    }
+
+    /**
      * @param int $c
      */
     protected function initWithConstant($c = 0)

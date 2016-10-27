@@ -188,6 +188,35 @@ final class FloatTensor extends Tensor
     }
 
     /**
+     * @param int[]|array[] $source
+     * @param (null|int|int[])[] $sliceSpec
+     * @return void
+     */
+    public function setArrayAsSlice(array $source, array $sliceSpec)
+    {
+        $targetSliceShape = $this->getShapeFromSliceSpec($sliceSpec, true);
+
+        if (is_float($source[0]) || is_int($source[0])) {
+            if (count($source) !== array_iMul(...$targetSliceShape)) {
+                throw new ShapeMismatchException();
+            }
+        } else {
+            list($srcShape, $source) = self::inferShapeAndExtractData($source);
+
+            if ($srcShape !== $targetSliceShape) {
+                throw new ShapeMismatchException();
+            }
+        }
+
+        $dataIndex = 0;
+        foreach ($this->getInternalSlicesToBeCopied($sliceSpec) as $sliceToBeCopied) {
+            for ($i=$sliceToBeCopied[0]; $i <= $sliceToBeCopied[1]; $i++) {
+                $this->data[$i] = (float)$source[$dataIndex++];
+            }
+        }
+    }
+
+    /**
      * @param float $c
      */
     protected function initWithConstant($c = 0.0)
@@ -231,17 +260,7 @@ final class FloatTensor extends Tensor
         if ($value instanceof Tensor) {
             $this->setSlice($value, $offset);
         } elseif (is_array($value) && count($value) > 0) {
-            if (is_float($value[0]) || is_int($value[0])) {
-                $this->setSlice(
-                    FloatTensor::fromArray($value, self::getShapeFromSliceSpec($offset, true)),
-                    $offset
-                );
-            } else {
-                $this->setSlice(
-                    FloatTensor::fromArray($value),
-                    $offset
-                );
-            }
+            $this->setArrayAsSlice($value, $offset);
         } else {
             $this->set($value, $offset);
         }

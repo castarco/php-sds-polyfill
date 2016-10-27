@@ -43,8 +43,8 @@ class randomBinomialTests extends TestCase
             }
         }
 
-        $this->assertGreaterThan(460, $positives);
-        $this->assertGreaterThan(460, $negatives);
+        $this->assertGreaterThan(450, $positives);
+        $this->assertGreaterThan(450, $negatives);
     }
 
     /**

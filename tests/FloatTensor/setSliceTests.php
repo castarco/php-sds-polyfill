@@ -79,7 +79,8 @@ class setSliceTests extends TestCase
 
     /**
      * @covers \SDS\FloatTensor::offsetSet
-     * @covers \SDS\FloatTensor::setSlice
+     * @covers \SDS\FloatTensor::setArrayAsSlice
+     * @covers \SDS\Tensor::inferShapeAndExtractData
      */
     public function test_with_ArrayAccess_idiom_and_array_param()
     {
@@ -100,7 +101,8 @@ class setSliceTests extends TestCase
 
     /**
      * @covers \SDS\FloatTensor::offsetSet
-     * @covers \SDS\FloatTensor::setSlice
+     * @covers \SDS\FloatTensor::setArrayAsSlice
+     * @covers \SDS\Tensor::inferShapeAndExtractData
      */
     public function test_with_ArrayAccess_idiom_and_flat_array_param()
     {
