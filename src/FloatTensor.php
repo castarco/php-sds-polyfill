@@ -188,6 +188,63 @@ final class FloatTensor extends Tensor
     }
 
     /**
+     * @param Tensor $t
+     * @param bool $inPlace
+     * @return FloatTensor
+     */
+    public function sum(Tensor $t, bool $inPlace = false) : FloatTensor
+    {
+        if ($t->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $sumT = $inPlace ? $this : clone $this;
+        foreach ($sumT->data as $i => $v) {
+            $sumT->data[$i] += (float)$t->data[$i];
+        }
+
+        return $sumT;
+    }
+
+    /**
+     * @param Tensor $t
+     * @param bool $inPlace
+     * @return FloatTensor
+     */
+    public function mul(Tensor $t, bool $inPlace = false) : FloatTensor
+    {
+        if ($t->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $mulT = $inPlace ? $this : clone $this;
+        foreach ($mulT->data as $i => $v) {
+            $mulT->data[$i] *= (float)$t->data[$i];
+        }
+
+        return $mulT;
+    }
+
+    /**
+     * @param Tensor $t
+     * @param bool $inPlace
+     * @return FloatTensor
+     */
+    public function div(Tensor $t, bool $inPlace = false) : FloatTensor
+    {
+        if ($t->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $divT = $inPlace ? $this : clone $this;
+        foreach ($divT->data as $i => $v) {
+            $divT->data[$i] /= $t->data[$i];
+        }
+
+        return $divT;
+    }
+
+    /**
      * @param int[]|array[] $source
      * @param (null|int|int[])[] $sliceSpec
      * @return void

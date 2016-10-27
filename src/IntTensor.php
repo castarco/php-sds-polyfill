@@ -168,6 +168,63 @@ final class IntTensor extends Tensor
     }
 
     /**
+     * @param IntTensor $t
+     * @param bool $inPlace
+     * @return IntTensor
+     */
+    public function sum(IntTensor $t, bool $inPlace = false) : IntTensor
+    {
+        if ($t->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $sumT = $inPlace ? $this : clone $this;
+        foreach ($sumT->data as $i => $v) {
+            $sumT->data[$i] += $t->data[$i];
+        }
+
+        return $sumT;
+    }
+
+    /**
+     * @param IntTensor $t
+     * @param bool $inPlace
+     * @return IntTensor
+     */
+    public function mul(IntTensor $t, bool $inPlace = false) : IntTensor
+    {
+        if ($t->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $mulT = $inPlace ? $this : clone $this;
+        foreach ($mulT->data as $i => $v) {
+            $mulT->data[$i] *= $t->data[$i];
+        }
+
+        return $mulT;
+    }
+
+    /**
+     * @param IntTensor $t
+     * @param bool $inPlace
+     * @return IntTensor
+     */
+    public function div(IntTensor $t, bool $inPlace = false) : IntTensor
+    {
+        if ($t->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $divT = $inPlace ? $this : clone $this;
+        foreach ($divT->data as $i => $v) {
+            $divT->data[$i] = \intdiv($v, $t->data[$i]);
+        }
+
+        return $divT;
+    }
+
+    /**
      * @param int[]|array[] $source
      * @param (null|int|int[])[] $sliceSpec
      * @return void
