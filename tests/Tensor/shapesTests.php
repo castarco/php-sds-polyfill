@@ -50,6 +50,9 @@ class shapesTests extends TestCase
         $this->assertTrue($t4->equals($t2));
         $this->assertTrue($t3->equals($t5));
         $this->assertTrue($t5->equals($t3));
+
+        $this->assertEquals(10, $t4[[1, 1]]);
+        $this->assertEquals(10, $t5[[4, 1]]);
     }
 
     /**
@@ -93,6 +96,9 @@ class shapesTests extends TestCase
 
         $this->assertEquals([4, 4], $t3->getShape());
         $this->assertEquals([4, 4], $t4->getShape());
+
+        $this->assertEquals(10, $t3[[2, 1]]);
+        $this->assertEquals(10, $t4[[2, 1]]);
     }
 
     /**
@@ -128,5 +134,9 @@ class shapesTests extends TestCase
         $this->assertTrue($t2->equals($t1->addDimension(0)));
         $this->assertTrue($t3->equals($t1->addDimension(1)));
         $this->assertTrue($t4->equals($t1->addDimension(2)));
+
+        $this->assertEquals(10, $t2[[0, 2, 1]]);
+        $this->assertEquals(10, $t3[[2, 0, 1]]);
+        $this->assertEquals(10, $t4[[2, 1, 0]]);
     }
 }

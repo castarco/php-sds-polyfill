@@ -91,7 +91,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         }
 
         $t = $inPlace ? $this : clone $this;
-        $t->shape = $shape;
+        $t->setShape($shape);
 
         return $t;
     }
@@ -103,9 +103,9 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
     public function squeeze(bool $inPlace = false) : Tensor
     {
         $t = $inPlace ? $this : clone $this;
-        $t->shape = \array_values(\array_filter($t->shape, function (int $x) : bool {
+        $t->setShape(\array_values(\array_filter($t->shape, function (int $x) : bool {
             return $x > 1;
-        }));
+        })));
 
         return $t;
     }
@@ -133,7 +133,40 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         if ($i === $position) {
             $shape[] = 1;
         }
-        $t->shape = $shape;
+        $t->setShape($shape);
+
+        return $t;
+    }
+
+    /**
+     * @param int[] $tileSpec
+     * @return Tensor
+     */
+    public function tile(array $tileSpec) : Tensor
+    {
+        self::checkShape(...$tileSpec);
+
+        $nDims = \count($this->shape);
+        if (\count($tileSpec) !== $nDims) {
+            throw new ShapeMismatchException();
+        }
+
+        /** @var int[] $newShape */
+        $newShape = \array_map('\SDS\functions\iMultiply', $this->shape, $tileSpec);
+        $pointer = \array_fill(0, $nDims, 0);
+
+        $t = new static();
+        $t->setShape($newShape);
+        $t->data = new Vector();
+        $t->data->allocate(array_iMul(...$newShape));
+
+        do {
+            $t->data->push($this->get(...\array_map(
+                function (int $p, int $s) : int { return $p % $s; },
+                $pointer,
+                $this->shape
+            )));
+        } while (self::pointerUpdater($pointer, $newShape, $nDims));
 
         return $t;
     }
@@ -381,6 +414,28 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         }
 
         return $flatArray;
+    }
+
+    /**
+     * @param int[] &$pointer
+     * @param int[] $shape
+     * @param int $nDims
+     * @return bool
+     */
+    private static function pointerUpdater(array &$pointer, array $shape, int $nDims) : bool {
+        for ($i=$nDims-1; $i >= 0; $i--) {
+            if ($pointer[$i] < $shape[$i]-1) {
+                $pointer[$i]++;
+
+                for ($j=$i+1; $j<$nDims; $j++) {
+                    $pointer[$j] = 0;
+                }
+
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // -----------------------------------------------------------------------------------------------------------------
