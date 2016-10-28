@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SDS;
 
 
+use Doctrine\Instantiator\Exception\InvalidArgumentException;
 use Ds\{Hashable, Vector};
 
 use SDS\Exceptions\InvalidPermutationException;
@@ -208,21 +209,21 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
     }
 
     /**
-     * @param null|bool[] $dimsToCollapse
+     * @param null|int|bool[] $dimsToCollapse
+     * @param bool $keepRedundantDims
      * @return int|float|IntTensor|FloatTensor
      */
-    public function sum(array $dimsToCollapse = null)
+    public function sum($dimsToCollapse = null, bool $keepRedundantDims=false)
     {
         $nDims = \count($this->shape);
 
         if (null === $dimsToCollapse) {
             return $this->data->sum();
-        } elseif (\count($dimsToCollapse) !== $nDims) {
-            throw new ShapeMismatchException();
+        } else {
+            self::checkDimsSelector($dimsToCollapse, $nDims);
         }
 
         $pointer = \array_fill(0, $nDims, 0);
-
         $newShape = self::collapseDims($this->shape, $dimsToCollapse, true);
 
         $t = new static();
@@ -237,21 +238,21 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
             ];
         } while(self::pointerUpdater($pointer, $this->shape, $nDims));
 
-        return $t->squeeze(true);
+        return $keepRedundantDims ? $t : $t->squeeze(true);
     }
 
     /**
-     * @param null|bool[] $dimsToCollapse
+     * @param null|int|bool[] $dimsToCollapse
      * @return int|float|IntTensor|FloatTensor
      */
-    public function max(array $dimsToCollapse = null)
+    public function max($dimsToCollapse = null)
     {
         $nDims = \count($this->shape);
 
         if (null === $dimsToCollapse) {
             return \max(...$this->data);
-        } elseif (\count($dimsToCollapse) !== $nDims) {
-            throw new ShapeMismatchException();
+        } else {
+            self::checkDimsSelector($dimsToCollapse, $nDims);
         }
 
         $pointer = \array_fill(0, $nDims, 0);
@@ -271,17 +272,17 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
     }
 
     /**
-     * @param null|bool[] $dimsToCollapse
+     * @param null|int|bool[] $dimsToCollapse
      * @return int|float|IntTensor|FloatTensor
      */
-    public function min(array $dimsToCollapse = null)
+    public function min($dimsToCollapse = null)
     {
         $nDims = \count($this->shape);
 
         if (null === $dimsToCollapse) {
             return \min(...$this->data);
-        } elseif (\count($dimsToCollapse) !== $nDims) {
-            throw new ShapeMismatchException();
+        } else {
+            self::checkDimsSelector($dimsToCollapse, $nDims);
         }
 
         $pointer = \array_fill(0, $nDims, 0);
@@ -298,6 +299,46 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         } while(self::pointerUpdater($pointer, $this->shape, $nDims));
 
         return $t->squeeze(true);
+    }
+
+    /**
+     * @param null|int|bool[] $dimsToCollapse
+     * @param bool $keepRedundantDims
+     * @return float|FloatTensor
+     */
+    public function mean($dimsToCollapse = null, bool $keepRedundantDims=false)
+    {
+        $nDims = \count($this->shape);
+
+        if (null === $dimsToCollapse) {
+            return $this->data->sum() / \count($this->data);
+        } else {
+            self::checkDimsSelector($dimsToCollapse, $nDims);
+        }
+
+        $t = new FloatTensor();
+        $t->setShape(self::collapseDims($this->shape, $dimsToCollapse, true));
+        $t->initWithConstant(0);
+
+        $pointer = \array_fill(0, $nDims, 0);
+
+        do {
+            $t->data[
+                $t->getInternalIndex(...self::collapseDims($pointer, $dimsToCollapse))
+            ] += $this->data[
+                $this->getInternalIndex(...$pointer)
+            ];
+        } while(self::pointerUpdater($pointer, $this->shape, $nDims));
+
+        $divisor = 1.0;
+        foreach ($dimsToCollapse as $i => $d) {
+            if ($d) $divisor *= $this->shape[$i];
+        }
+        $t->data->apply(function (float $v) use ($divisor) : float {
+            return $v / $divisor;
+        });
+
+        return $keepRedundantDims ? $t : $t->squeeze(true);
     }
 
     /**
@@ -588,6 +629,33 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         }
 
         return true;
+    }
+
+    /**
+     * @param int|bool[] $dimsToCollapse
+     * @param int $nDims
+     * @throws ShapeMismatchException
+     * @throws \InvalidArgumentException
+     */
+    private static function checkDimsSelector(&$dimsToCollapse, int $nDims)
+    {
+        if (is_int($dimsToCollapse)) {
+            if ($dimsToCollapse < 0 || $dimsToCollapse >= $nDims) {
+                throw new \InvalidArgumentException();
+            }
+
+            $tmp = \array_fill(0, $nDims, false);
+            $tmp[$dimsToCollapse] = true;
+            $dimsToCollapse = $tmp;
+        }
+        elseif (is_array($dimsToCollapse)) {
+            if (\count($dimsToCollapse) !== $nDims) {
+                throw new ShapeMismatchException();
+            }
+        }
+        else {
+            throw new \InvalidArgumentException();
+        }
     }
 
     /**

@@ -14,6 +14,7 @@ class sumTests extends TestCase
 {
     /**
      * @covers \SDS\Tensor::sum
+     * @covers \SDS\Tensor::checkDimsSelector
      * @covers \SDS\Tensor::collapseDims
      */
     function test()

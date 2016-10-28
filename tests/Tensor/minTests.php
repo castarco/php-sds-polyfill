@@ -14,6 +14,7 @@ class minTests extends TestCase
 {
     /**
      * @covers \SDS\Tensor::min
+     * @covers \SDS\Tensor::checkDimsSelector
      * @covers \SDS\Tensor::collapseDims
      */
     function test()

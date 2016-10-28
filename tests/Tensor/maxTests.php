@@ -14,6 +14,7 @@ class maxTests extends TestCase
 {
     /**
      * @covers \SDS\Tensor::max
+     * @covers \SDS\Tensor::checkDimsSelector
      * @covers \SDS\Tensor::collapseDims
      */
     function test()
