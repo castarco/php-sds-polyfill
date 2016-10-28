@@ -231,10 +231,70 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
 
         do {
             $t->data[
-            $t->getInternalIndex(...self::collapseDims($pointer, $dimsToCollapse))
+                $t->getInternalIndex(...self::collapseDims($pointer, $dimsToCollapse))
             ] += $this->data[
-            $this->getInternalIndex(...$pointer)
+                $this->getInternalIndex(...$pointer)
             ];
+        } while(self::pointerUpdater($pointer, $this->shape, $nDims));
+
+        return $t->squeeze(true);
+    }
+
+    /**
+     * @param null|bool[] $dimsToCollapse
+     * @return int|float|IntTensor|FloatTensor
+     */
+    public function max(array $dimsToCollapse = null)
+    {
+        $nDims = \count($this->shape);
+
+        if (null === $dimsToCollapse) {
+            return \max(...$this->data);
+        } elseif (\count($dimsToCollapse) !== $nDims) {
+            throw new ShapeMismatchException();
+        }
+
+        $pointer = \array_fill(0, $nDims, 0);
+
+        $newShape = self::collapseDims($this->shape, $dimsToCollapse, true);
+
+        $t = new static();
+        $t->setShape($newShape);
+        $t->initWithConstant($this instanceof IntTensor ? -PHP_INT_MAX-1 : -INF);
+
+        do {
+            $i = $t->getInternalIndex(...self::collapseDims($pointer, $dimsToCollapse));
+            $t->data[$i] = \max($t->data[$i], $this->data[$this->getInternalIndex(...$pointer)]);
+        } while(self::pointerUpdater($pointer, $this->shape, $nDims));
+
+        return $t->squeeze(true);
+    }
+
+    /**
+     * @param null|bool[] $dimsToCollapse
+     * @return int|float|IntTensor|FloatTensor
+     */
+    public function min(array $dimsToCollapse = null)
+    {
+        $nDims = \count($this->shape);
+
+        if (null === $dimsToCollapse) {
+            return \min(...$this->data);
+        } elseif (\count($dimsToCollapse) !== $nDims) {
+            throw new ShapeMismatchException();
+        }
+
+        $pointer = \array_fill(0, $nDims, 0);
+
+        $newShape = self::collapseDims($this->shape, $dimsToCollapse, true);
+
+        $t = new static();
+        $t->setShape($newShape);
+        $t->initWithConstant($this instanceof IntTensor ? PHP_INT_MAX : +INF);
+
+        do {
+            $i = $t->getInternalIndex(...self::collapseDims($pointer, $dimsToCollapse));
+            $t->data[$i] = \min($t->data[$i], $this->data[$this->getInternalIndex(...$pointer)]);
         } while(self::pointerUpdater($pointer, $this->shape, $nDims));
 
         return $t->squeeze(true);
