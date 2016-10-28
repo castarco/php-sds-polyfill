@@ -188,6 +188,21 @@ final class FloatTensor extends Tensor
     }
 
     /**
+     * @param bool $inPlace
+     * @return FloatTensor
+     */
+    public function neg(bool $inPlace = false) : FloatTensor
+    {
+        $sumT = $inPlace ? $this : clone $this;
+
+        foreach ($sumT->data as $i => $v) {
+            $sumT->data[$i] = -$sumT->data[$i];
+        }
+
+        return $sumT;
+    }
+
+    /**
      * @param Tensor $t
      * @param bool $inPlace
      * @return FloatTensor
@@ -204,6 +219,25 @@ final class FloatTensor extends Tensor
         }
 
         return $sumT;
+    }
+
+    /**
+     * @param Tensor $t
+     * @param bool $inPlace
+     * @return FloatTensor
+     */
+    public function sub(Tensor $t, bool $inPlace = false) : FloatTensor
+    {
+        if ($t->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $subT = $inPlace ? $this : clone $this;
+        foreach ($subT->data as $i => $v) {
+            $subT->data[$i] -= (float)$t->data[$i];
+        }
+
+        return $subT;
     }
 
     /**
@@ -242,6 +276,44 @@ final class FloatTensor extends Tensor
         }
 
         return $divT;
+    }
+
+    /**
+     * @param Tensor $t
+     * @param bool $inPlace
+     * @return FloatTensor
+     */
+    public function mod(Tensor $t, bool $inPlace = false) : FloatTensor
+    {
+        if ($t->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $modT = $inPlace ? $this : clone $this;
+        foreach ($modT->data as $i => $v) {
+            $modT->data[$i] = \fmod($modT->data[$i], $t->data[$i]);
+        }
+
+        return $modT;
+    }
+
+    /**
+     * @param Tensor $t
+     * @param bool $inPlace
+     * @return FloatTensor
+     */
+    public function pow(Tensor $t, bool $inPlace = false) : FloatTensor
+    {
+        if ($t->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $powT = $inPlace ? $this : clone $this;
+        foreach ($powT->data as $i => $v) {
+            $powT->data[$i] = (float)\pow($powT->data[$i], $t->data[$i]);
+        }
+
+        return $powT;
     }
 
     /**

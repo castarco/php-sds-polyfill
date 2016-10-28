@@ -100,7 +100,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
 
     /**
      * @param bool $inPlace
-     * @return Tensor
+     * @return Tensor|IntTensor|FloatTensor
      */
     public function squeeze(bool $inPlace = false) : Tensor
     {
@@ -177,11 +177,19 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
      * @param int[] $permutation
      * @return Tensor
      */
-    public function transpose(array $permutation) : Tensor
+    public function transpose(array $permutation = null) : Tensor
     {
-        $this->checkPermutation(...$permutation);
-
         $nDims = \count($this->shape);
+
+        if (null === $permutation) {
+            $permutation = [];
+            for ($i=$nDims-1; $i >= 0; $i--) {
+                $permutation[] = $i;
+            }
+        } else {
+            $this->checkPermutation(...$permutation);
+        }
+
         $newShape = self::permute($this->shape, $permutation);
         $pointer = \array_fill(0, $nDims, 0);
 
@@ -197,6 +205,39 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         } while (self::pointerUpdater($pointer, $this->shape, $nDims));
 
         return $t;
+    }
+
+    /**
+     * @param null|bool[] $dimsToCollapse
+     * @return int|float|IntTensor|FloatTensor
+     */
+    public function sum(array $dimsToCollapse = null)
+    {
+        $nDims = \count($this->shape);
+
+        if (null === $dimsToCollapse) {
+            return $this->data->sum();
+        } elseif (\count($dimsToCollapse) !== $nDims) {
+            throw new ShapeMismatchException();
+        }
+
+        $pointer = \array_fill(0, $nDims, 0);
+
+        $newShape = self::collapseDims($this->shape, $dimsToCollapse, true);
+
+        $t = new static();
+        $t->setShape($newShape);
+        $t->initWithConstant(0);
+
+        do {
+            $t->data[
+            $t->getInternalIndex(...self::collapseDims($pointer, $dimsToCollapse))
+            ] += $this->data[
+            $this->getInternalIndex(...$pointer)
+            ];
+        } while(self::pointerUpdater($pointer, $this->shape, $nDims));
+
+        return $t->squeeze(true);
     }
 
     /**
@@ -356,6 +397,50 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
     }
 
     /**
+     * @param int[] &$pointer
+     * @param int[] $shape
+     * @param int $nDims
+     * @return bool
+     */
+    protected static function pointerUpdater(array &$pointer, array $shape, int $nDims) : bool
+    {
+        for ($i=$nDims-1; $i >= 0; $i--) {
+            if ($pointer[$i] < $shape[$i]-1) {
+                $pointer[$i]++;
+
+                for ($j=$i+1; $j<$nDims; $j++) {
+                    $pointer[$j] = 0;
+                }
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param int[] $dims
+     * @param bool[] $dimsToCollapse
+     * @param bool $isShape
+     * @return array
+     */
+    protected static function collapseDims(array $dims, array $dimsToCollapse, bool $isShape = false) : array
+    {
+        return $isShape
+            ? \array_map(
+                function ($sDim, $collapse) { return $collapse ? 1 : $sDim; },
+                $dims,
+                $dimsToCollapse
+            )
+            : \array_map(
+                function ($sDim, $collapse) { return $collapse ? 0 : $sDim; },
+                $dims,
+                $dimsToCollapse
+            );
+    }
+
+    /**
      * @param (null|int|int[])[] $sliceSpec
      * @throws ShapeMismatchException
      */
@@ -462,28 +547,6 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         }
 
         return $flatArray;
-    }
-
-    /**
-     * @param int[] &$pointer
-     * @param int[] $shape
-     * @param int $nDims
-     * @return bool
-     */
-    private static function pointerUpdater(array &$pointer, array $shape, int $nDims) : bool {
-        for ($i=$nDims-1; $i >= 0; $i--) {
-            if ($pointer[$i] < $shape[$i]-1) {
-                $pointer[$i]++;
-
-                for ($j=$i+1; $j<$nDims; $j++) {
-                    $pointer[$j] = 0;
-                }
-
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**

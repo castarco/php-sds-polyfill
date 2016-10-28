@@ -168,6 +168,22 @@ final class IntTensor extends Tensor
     }
 
     /**
+     * @param bool $inPlace
+     * @return IntTensor
+     */
+    public function neg(bool $inPlace = false) : IntTensor
+    {
+        $negT = $inPlace ? $this : clone $this;
+
+        // TODO: Check if Vector::apply can be faster
+        foreach ($negT->data as $i => $v) {
+            $negT->data[$i] = -$negT->data[$i];
+        }
+
+        return $negT;
+    }
+
+    /**
      * @param IntTensor $t
      * @param bool $inPlace
      * @return IntTensor
@@ -184,6 +200,25 @@ final class IntTensor extends Tensor
         }
 
         return $sumT;
+    }
+
+    /**
+     * @param IntTensor $t
+     * @param bool $inPlace
+     * @return IntTensor
+     */
+    public function sub(IntTensor $t, bool $inPlace = false) : IntTensor
+    {
+        if ($t->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $subT = $inPlace ? $this : clone $this;
+        foreach ($subT->data as $i => $v) {
+            $subT->data[$i] -= $t->data[$i];
+        }
+
+        return $subT;
     }
 
     /**
@@ -222,6 +257,44 @@ final class IntTensor extends Tensor
         }
 
         return $divT;
+    }
+
+    /**
+     * @param IntTensor $t
+     * @param bool $inPlace
+     * @return IntTensor
+     */
+    public function mod(IntTensor $t, bool $inPlace = false) : IntTensor
+    {
+        if ($t->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $modT = $inPlace ? $this : clone $this;
+        foreach ($modT->data as $i => $v) {
+            $modT->data[$i] %= $t->data[$i];
+        }
+
+        return $modT;
+    }
+
+    /**
+     * @param IntTensor $t
+     * @param bool $inPlace
+     * @return IntTensor
+     */
+    public function pow(IntTensor $t, bool $inPlace = false) : IntTensor
+    {
+        if ($t->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $modT = $inPlace ? $this : clone $this;
+        foreach ($modT->data as $i => $v) {
+            $modT->data[$i] = (int)\pow($modT->data[$i], $t->data[$i]);
+        }
+
+        return $modT;
     }
 
     /**
