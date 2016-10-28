@@ -243,9 +243,10 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
 
     /**
      * @param null|int|bool[] $dimsToCollapse
+     * @param bool $keepRedundantDims
      * @return int|float|IntTensor|FloatTensor
      */
-    public function max($dimsToCollapse = null)
+    public function max($dimsToCollapse = null, bool $keepRedundantDims=false)
     {
         $nDims = \count($this->shape);
 
@@ -268,14 +269,15 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
             $t->data[$i] = \max($t->data[$i], $this->data[$this->getInternalIndex(...$pointer)]);
         } while(self::pointerUpdater($pointer, $this->shape, $nDims));
 
-        return $t->squeeze(true);
+        return $keepRedundantDims ? $t : $t->squeeze(true);
     }
 
     /**
      * @param null|int|bool[] $dimsToCollapse
+     * @param bool $keepRedundantDims
      * @return int|float|IntTensor|FloatTensor
      */
-    public function min($dimsToCollapse = null)
+    public function min($dimsToCollapse = null, bool $keepRedundantDims=false)
     {
         $nDims = \count($this->shape);
 
@@ -298,7 +300,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
             $t->data[$i] = \min($t->data[$i], $this->data[$this->getInternalIndex(...$pointer)]);
         } while(self::pointerUpdater($pointer, $this->shape, $nDims));
 
-        return $t->squeeze(true);
+        return $keepRedundantDims ? $t : $t->squeeze(true);
     }
 
     /**
@@ -340,6 +342,8 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
 
         return $keepRedundantDims ? $t : $t->squeeze(true);
     }
+
+
 
     /**
      * @param int[] ...$offset
