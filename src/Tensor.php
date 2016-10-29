@@ -354,18 +354,18 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
 
         if (null === $dimsToCollapse) {
             $mean = $this->data->sum() / \count($this->data);
-            $acc = 0;
+            $acc = 0.0;
             foreach ($this->data as $x) {
                 $acc += ($x-$mean)*($x-$mean);
             }
-            return $acc / (\count($this->data) - 1);
+            return $acc / (\count($this->data) - 1.0);
         } else {
             self::checkDimsSelector($dimsToCollapse, $nDims);
         }
 
         $t = new FloatTensor();
         $t->setShape(self::collapseDims($this->shape, $dimsToCollapse, true));
-        $t->initWithConstant(0);
+        $t->initWithConstant(0.0);
 
         $pointer = \array_fill(0, $nDims, 0);
         do {
@@ -385,7 +385,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         });
 
         $mean = $t->data;
-        $t->initWithConstant(0);
+        $t->initWithConstant(0.0);
 
         $pointer = \array_fill(0, $nDims, 0);
         do {
@@ -402,6 +402,24 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         });
 
         return $keepRedundantDims ? $t : $t->squeeze(true);
+    }
+
+    /**
+     * @param null $dimsToCollapse
+     * @param bool $keepRedundantDims
+     * @return float|FloatTensor
+     */
+    public function stddev($dimsToCollapse = null, bool $keepRedundantDims=false)
+    {
+        $t = $this->variance($dimsToCollapse, $keepRedundantDims);
+
+        if (is_scalar($t)) {
+            return \sqrt($t);
+        }
+
+        $t->data->apply('\sqrt');
+
+        return $t;
     }
 
     /**
