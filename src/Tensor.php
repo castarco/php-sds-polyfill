@@ -343,7 +343,66 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         return $keepRedundantDims ? $t : $t->squeeze(true);
     }
 
+    /**
+     * @param null $dimsToCollapse
+     * @param bool $keepRedundantDims
+     * @return float|FloatTensor
+     */
+    public function variance($dimsToCollapse = null, bool $keepRedundantDims=false)
+    {
+        $nDims = \count($this->shape);
 
+        if (null === $dimsToCollapse) {
+            $mean = $this->data->sum() / \count($this->data);
+            $acc = 0;
+            foreach ($this->data as $x) {
+                $acc += ($x-$mean)*($x-$mean);
+            }
+            return $acc / (\count($this->data) - 1);
+        } else {
+            self::checkDimsSelector($dimsToCollapse, $nDims);
+        }
+
+        $t = new FloatTensor();
+        $t->setShape(self::collapseDims($this->shape, $dimsToCollapse, true));
+        $t->initWithConstant(0);
+
+        $pointer = \array_fill(0, $nDims, 0);
+        do {
+            $t->data[
+                $t->getInternalIndex(...self::collapseDims($pointer, $dimsToCollapse))
+            ] += $this->data[
+                $this->getInternalIndex(...$pointer)
+            ];
+        } while(self::pointerUpdater($pointer, $this->shape, $nDims));
+
+        $divisor = 1.0;
+        foreach ($dimsToCollapse as $i => $d) {
+            if ($d) $divisor *= $this->shape[$i];
+        }
+        $t->data->apply(function (float $v) use ($divisor) : float {
+            return $v / $divisor;
+        });
+
+        $mean = $t->data;
+        $t->initWithConstant(0);
+
+        $pointer = \array_fill(0, $nDims, 0);
+        do {
+            $collapsedIndex = $t->getInternalIndex(...self::collapseDims($pointer, $dimsToCollapse));
+
+            $t->data[$collapsedIndex] += pow(
+                $this->data[$this->getInternalIndex(...$pointer)] - $mean[$collapsedIndex],
+                2
+            );
+        } while(self::pointerUpdater($pointer, $this->shape, $nDims));
+
+        $t->data->apply(function (float $v) use ($divisor) : float {
+            return $v / ($divisor-1);
+        });
+
+        return $keepRedundantDims ? $t : $t->squeeze(true);
+    }
 
     /**
      * @param int[] ...$offset
