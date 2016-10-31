@@ -16,6 +16,7 @@ class maxTests extends TestCase
      * @covers \SDS\Tensor::max
      * @covers \SDS\Tensor::checkDimsSelector
      * @covers \SDS\Tensor::collapseDims
+     * @covers \SDS\Tensor::fastGetInternalIndex
      */
     function test()
     {

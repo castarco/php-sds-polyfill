@@ -232,7 +232,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
 
         do {
             $t->data[
-                $t->getInternalIndex(...self::collapseDims($pointer, $dimsToCollapse))
+                $t->fastGetInternalIndex(self::collapseDims($pointer, $dimsToCollapse))
             ] += $this->data[$i++];
         } while(self::pointerUpdater($pointer, $this->shape, $nDims));
 
@@ -262,7 +262,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         $i = 0;
 
         do {
-            $j = $t->getInternalIndex(...self::collapseDims($pointer, $dimsToCollapse));
+            $j = $t->fastGetInternalIndex(self::collapseDims($pointer, $dimsToCollapse));
             $t->data[$j] = \max($t->data[$j], $this->data[$i++]);
         } while(self::pointerUpdater($pointer, $this->shape, $nDims));
 
@@ -292,7 +292,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         $i = 0;
 
         do {
-            $j = $t->getInternalIndex(...self::collapseDims($pointer, $dimsToCollapse));
+            $j = $t->fastGetInternalIndex(self::collapseDims($pointer, $dimsToCollapse));
             $t->data[$j] = \min($t->data[$j], $this->data[$i++]);
         } while(self::pointerUpdater($pointer, $this->shape, $nDims));
 
@@ -323,7 +323,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
 
         do {
             $t->data[
-                $t->getInternalIndex(...self::collapseDims($pointer, $dimsToCollapse))
+                $t->fastGetInternalIndex(self::collapseDims($pointer, $dimsToCollapse))
             ] += $this->data[$i++];
         } while(self::pointerUpdater($pointer, $this->shape, $nDims));
 
@@ -367,7 +367,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
 
         do {
             $t->data[
-                $t->getInternalIndex(...self::collapseDims($pointer, $dimsToCollapse))
+                $t->fastGetInternalIndex(self::collapseDims($pointer, $dimsToCollapse))
             ] += $this->data[$i++];
         } while(self::pointerUpdater($pointer, $this->shape, $nDims));
 
@@ -386,7 +386,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         $i = 0;
 
         do {
-            $collapsedIndex = $t->getInternalIndex(...self::collapseDims($pointer, $dimsToCollapse));
+            $collapsedIndex = $t->fastGetInternalIndex(self::collapseDims($pointer, $dimsToCollapse));
 
             $t->data[$collapsedIndex] += pow(
                 $this->data[$i++] - $mean[$collapsedIndex],
@@ -459,6 +459,21 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
             }
         }
 
+        return (int)\array_sum(
+            \array_map(
+                'SDS\functions\iMultiply',
+                $offset,
+                $this->indexShifts
+            )
+        );
+    }
+
+    /**
+     * @param int[] $offset
+     * @return int
+     */
+    protected function fastGetInternalIndex (array $offset) : int
+    {
         return (int)\array_sum(
             \array_map(
                 'SDS\functions\iMultiply',

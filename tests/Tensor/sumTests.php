@@ -16,6 +16,7 @@ class sumTests extends TestCase
      * @covers \SDS\Tensor::sum
      * @covers \SDS\Tensor::checkDimsSelector
      * @covers \SDS\Tensor::collapseDims
+     * @covers \SDS\Tensor::fastGetInternalIndex
      */
     function test()
     {

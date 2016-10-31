@@ -16,6 +16,7 @@ class varianceTests extends TestCase
      * @covers \SDS\Tensor::variance
      * @covers \SDS\Tensor::checkDimsSelector
      * @covers \SDS\Tensor::collapseDims
+     * @covers \SDS\Tensor::fastGetInternalIndex
      */
     function test()
     {

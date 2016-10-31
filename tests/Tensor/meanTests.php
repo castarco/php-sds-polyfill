@@ -16,6 +16,7 @@ class meanTests extends TestCase
      * @covers \SDS\Tensor::mean
      * @covers \SDS\Tensor::checkDimsSelector
      * @covers \SDS\Tensor::collapseDims
+     * @covers \SDS\Tensor::fastGetInternalIndex
      */
     function test()
     {

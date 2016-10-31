@@ -16,6 +16,7 @@ class minTests extends TestCase
      * @covers \SDS\Tensor::min
      * @covers \SDS\Tensor::checkDimsSelector
      * @covers \SDS\Tensor::collapseDims
+     * @covers \SDS\Tensor::fastGetInternalIndex
      */
     function test()
     {
