@@ -469,21 +469,6 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
     }
 
     /**
-     * @param int[] $offset
-     * @return int
-     */
-    protected function fastGetInternalIndex (array $offset) : int
-    {
-        return (int)\array_sum(
-            \array_map(
-                'SDS\functions\iMultiply',
-                $offset,
-                $this->indexShifts
-            )
-        );
-    }
-
-    /**
      * @param int[] $shape
      */
     protected function setShape(array $shape)
@@ -632,6 +617,21 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
                 $dims,
                 $dimsToCollapse
             );
+    }
+
+    /**
+     * @param int[] $offset
+     * @return int
+     */
+    private function fastGetInternalIndex (array $offset) : int
+    {
+        return (int)\array_sum(
+            \array_map(
+                'SDS\functions\iMultiply',
+                $offset,
+                $this->indexShifts
+            )
+        );
     }
 
     /**
