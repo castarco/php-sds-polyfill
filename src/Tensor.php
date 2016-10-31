@@ -817,16 +817,14 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
      */
     public function hash() : int
     {
-        $mod = (2 << 61);
-
-        $hash = (31       + \count($this->shape)) % $mod;
-        $hash = (37*$hash + \count($this->data))  % $mod;
+        $hash =  31       + \count($this->shape);
+        $hash = (37*$hash + \count($this->data))  % \PHP_INT_MAX;
 
         foreach ($this->shape as $dimWidth) {
-            $hash = (41*$hash + $dimWidth) % $mod;
+            $hash = (41*$hash + $dimWidth) % \PHP_INT_MAX;
         }
         foreach ($this->data as $cell) {
-            $hash = (43*$hash + (int)\floor($cell)) % $mod;
+            $hash = (43*$hash + (int)\floor($cell)) % \PHP_INT_MAX;
         }
 
         return $hash;
