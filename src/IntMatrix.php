@@ -286,7 +286,7 @@ final class IntMatrix extends Matrix
     protected function initWithConstant($c = 0)
     {
         $this->data = new Vector(
-            array_fill(0, $this->height*$this>$this->width, (int)$c)
+            array_fill(0, $this->height * $this->width, (int)$c)
         );
     }
 

@@ -67,6 +67,9 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
      */
     public abstract function get(int $i, int $j);
 
+    /**
+     * Matrix constructor.
+     */
     protected function __construct()
     {
         $this->shape = [];
@@ -207,15 +210,11 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
      */
     public function offsetExists($offset) : bool
     {
-        try {
-            return (
-                \is_array($offset) && \count($offset) === 2 &&
-                \is_int($offset[0]) && $offset[0] < $this->height && $offset[0] >= 0 &&
-                \is_int($offset[1]) && $offset[1] < $this->width  && $offset[1] >= 0
-            );
-        } catch (\Throwable $t) {
-            return false;
-        }
+        return (
+            \is_array($offset) && \count($offset) === 2 &&
+            \is_int($offset[0]) && $offset[0] < $this->height && $offset[0] >= 0 &&
+            \is_int($offset[1]) && $offset[1] < $this->width  && $offset[1] >= 0
+        );
     }
 
     /**

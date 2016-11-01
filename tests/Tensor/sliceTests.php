@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 
-namespace SDS\Tests\FloatTensor;
+namespace SDS\Tests\Tensor;
 
 
 use SDS\IntTensor;
