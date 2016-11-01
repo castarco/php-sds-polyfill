@@ -69,9 +69,9 @@ final class FloatTensor extends Tensor
         $t->data = new Vector();
         $t->data->allocate($dataSize);
 
-        $factor = ($maxL-$minL)/getrandmax();
+        $factor = ($maxL-$minL)/\getrandmax();
         for ($i=0; $i<$dataSize; $i++) {
-            $t->data->push(rand()*$factor + $minL);
+            $t->data->push(\rand()*$factor + $minL);
         }
 
         return $t;
@@ -94,7 +94,7 @@ final class FloatTensor extends Tensor
         $t->data = new Vector();
         $t->data->allocate($dataSize);
 
-        $divisor = getrandmax();
+        $divisor = \getrandmax();
         $two_pi  = 2.0 * 3.14159265358979323846;
 
         // Box-Muller Transform
@@ -339,7 +339,7 @@ final class FloatTensor extends Tensor
     protected function initWithConstant($c = 0.0)
     {
         $this->data = new Vector(
-            array_fill(0, array_iMul(...$this->shape), (float)$c)
+            \array_fill(0, array_iMul(...$this->shape), (float)$c)
         );
     }
 
@@ -351,7 +351,7 @@ final class FloatTensor extends Tensor
     protected static function fromArrayWithForcedShape(array $shape, float ...$source) : FloatTensor
     {
         self::checkShape(...$shape);
-        if (array_iMul(...$shape) !== count($source)) {
+        if (array_iMul(...$shape) !== \count($source)) {
             throw new ShapeMismatchException();
         }
 
@@ -376,7 +376,7 @@ final class FloatTensor extends Tensor
     {
         if ($value instanceof Tensor) {
             $this->setSlice($value, $offset);
-        } elseif (is_array($value) && count($value) > 0) {
+        } elseif (\is_array($value) && \count($value) > 0) {
             $this->setArrayAsSlice($value, $offset);
         } else {
             $this->set($value, $offset);

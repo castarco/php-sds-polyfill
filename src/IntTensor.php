@@ -71,7 +71,7 @@ final class IntTensor extends Tensor
         $t->data->allocate($dataSize);
 
         for ($i=0; $i<$dataSize; $i++) {
-            $t->data->push(rand($minL, $maxL));
+            $t->data->push(\rand($minL, $maxL));
         }
 
         return $t;
@@ -320,7 +320,7 @@ final class IntTensor extends Tensor
     protected function initWithConstant($c = 0)
     {
         $this->data = new Vector(
-            array_fill(0, array_iMul(...$this->shape), (int)$c)
+            \array_fill(0, array_iMul(...$this->shape), (int)$c)
         );
     }
 
@@ -332,7 +332,7 @@ final class IntTensor extends Tensor
     protected static function fromArrayWithForcedShape(array $shape, int ...$source) : IntTensor
     {
         self::checkShape(...$shape);
-        if (array_iMul(...$shape) !== count($source)) {
+        if (array_iMul(...$shape) !== \count($source)) {
             throw new ShapeMismatchException();
         }
 
@@ -357,7 +357,7 @@ final class IntTensor extends Tensor
     {
         if ($value instanceof IntTensor) {
             $this->setSlice($value, $offset);
-        } elseif (is_array($value) && count($value) > 0) {
+        } elseif (\is_array($value) && \count($value) > 0) {
             $this->setArrayAsSlice($value, $offset);
         } else {
             $this->set($value, $offset);
