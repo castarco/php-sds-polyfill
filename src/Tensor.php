@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace SDS;
 
 
-use Doctrine\Instantiator\Exception\InvalidArgumentException;
 use Ds\{Hashable, Vector};
 
 use SDS\Exceptions\InvalidPermutationException;
@@ -716,7 +715,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
 
         foreach ($this->shape as $dimIndex => $dimWidth) {
             // We allow negative indexes
-            if ($offset[$dimIndex] >= $dimWidth || $offset[$dimIndex] < -$dimWidth) {
+            if ($offset[$dimIndex] >= $dimWidth || $offset[$dimIndex] < 0) {
                 return false;
             }
         }

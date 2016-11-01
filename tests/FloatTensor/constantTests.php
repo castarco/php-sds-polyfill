@@ -13,6 +13,7 @@ class __constructTests extends TestCase
 {
     /**
      * @covers \SDS\FloatTensor::zeros
+     * @covers \SDS\FloatTensor::constant
      * @covers \SDS\FloatTensor::initWithConstant
      * @covers \SDS\Tensor::__construct
      * @covers \SDS\Tensor::checkShape
@@ -44,6 +45,7 @@ class __constructTests extends TestCase
 
     /**
      * @covers \SDS\FloatTensor::zeros
+     * @covers \SDS\FloatTensor::constant
      * @covers \SDS\Tensor::__construct
      * @covers \SDS\Tensor::checkShape
      *
@@ -53,5 +55,21 @@ class __constructTests extends TestCase
     public function test_constructor_with_invalid_shape()
     {
         FloatTensor::zeros([-2]);
+    }
+
+    /**
+     * @covers \SDS\FloatTensor::ones
+     * @covers \SDS\FloatTensor::constant
+     * @covers \SDS\Tensor::__construct
+     * @covers \SDS\Tensor::checkShape
+     */
+    public function test_ones()
+    {
+        $ones = FloatTensor::ones([2, 2]);
+
+        $this->assertEquals(1, $ones[[0, 0]]);
+        $this->assertEquals(1, $ones[[0, 1]]);
+        $this->assertEquals(1, $ones[[1, 0]]);
+        $this->assertEquals(1, $ones[[1, 1]]);
     }
 }
