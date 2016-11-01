@@ -13,10 +13,10 @@ use function SDS\functions\isAssociativeArray;
 abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, Hashable
 {
     /** @var int */
-    protected $height = 1;
+    protected $height;
 
     /** @var int */
-    protected $width = 1;
+    protected $width;
 
     /** @var int[] */
     protected $shape;
@@ -69,12 +69,18 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
 
     /**
      * Matrix constructor.
+     * @param int $height
+     * @param int $width
      */
-    protected function __construct()
+    protected function __construct(int $height = 1, int $width = 1)
     {
-        $this->shape = [];
-        $this->shape[] = &$this->height;
-        $this->shape[] = &$this->width;
+        if ($height < 1 || $width < 1) {
+            throw new \InvalidArgumentException();
+        }
+
+        $this->height = $height;
+        $this->width  = $width;
+        $this->shape  = [&$this->height, &$this->width];
     }
 
     /**

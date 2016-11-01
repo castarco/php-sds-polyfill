@@ -46,13 +46,7 @@ final class IntMatrix extends Matrix
      */
     public static function constant (int $c, int $height, int $width) : IntMatrix
     {
-        if ($height < 1 || $width < 1) {
-            throw new \InvalidArgumentException();
-        }
-
-        $m = new IntMatrix();
-        $m->height = $height;
-        $m->width  = $width;
+        $m = new IntMatrix($height, $width);
         $m->data = new Vector(\array_fill(0, $height * $width, $c));
 
         return $m;
@@ -67,13 +61,7 @@ final class IntMatrix extends Matrix
      */
     public static function randomUniform(int $height, int $width, int $maxL = 1, int $minL = 0) : IntMatrix
     {
-        if ($height < 1 || $width < 1) {
-            throw new \InvalidArgumentException();
-        }
-
-        $m = new IntMatrix();
-        $m->height = $height;
-        $m->width  = $width;
+        $m = new IntMatrix($height, $width);
         $m->data = new Vector();
 
         $dataSize = $height * $width;
@@ -94,13 +82,7 @@ final class IntMatrix extends Matrix
      */
     public static function randomBinomial(int $height, int $width, int $n) : IntMatrix
     {
-        if ($height < 1 || $width < 1) {
-            throw new \InvalidArgumentException();
-        }
-
-        $m = new IntMatrix();
-        $m->height = $height;
-        $m->width  = $width;
+        $m = new IntMatrix($height, $width);
         $m->data = new Vector();
 
         $dataSize = $height * $width;
@@ -127,21 +109,14 @@ final class IntMatrix extends Matrix
 
         if (null !== $height && null !== $width && \is_int($source[0])) {
 
-            if ($height < 1 || $width < 1 || $height * $width !== $len) {
+            if ($height * $width !== $len) {
                 throw new \InvalidArgumentException();
             }
 
-            $m = new IntMatrix();
+            $m = new IntMatrix($height, $width);
 
-            $m->height = $height;
-            $m->width  = $width;
-
-            $m->data = new Vector();
-            $m->data->allocate($len);
-
-            for ($i = 0; $i < $len; $i++) {
-                $m->data->push((int)$source[$i]);
-            }
+            $m->data = new Vector($source);
+            $m->data->apply(function ($x) { return (int)$x; });
 
             return $m;
 
@@ -150,19 +125,18 @@ final class IntMatrix extends Matrix
                 throw new \InvalidArgumentException();
             }
 
-            $m = new IntMatrix();
-
-            $m->height = $len;
-            $m->width  = $width;
+            $m = new IntMatrix($len, $width);
 
             $m->data = new Vector();
             $m->data->allocate($len * $width);
 
             for ($i = 0; $i < $len; $i++) {
-                for ($j = 0; $j < $width; $j++) {
-                    $m->data->push((int)$source[$i][$j]);
+                if (\count($source[$i]) !== $width) {
+                    throw new \InvalidArgumentException();
                 }
+                $m->data->push(...$source[$i]);
             }
+            $m->data->apply(function ($x) { return (int)$x; });
 
             return $m;
         } else {

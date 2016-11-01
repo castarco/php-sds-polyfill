@@ -28,7 +28,7 @@ function iMultiply (int $x, int $y) : int
 function isAssociativeArray(array $arr)
 {
     if ([] === $arr) return false;
-    return array_keys($arr) !== range(0, count($arr) - 1);
+    return \array_keys($arr) !== \range(0, \count($arr) - 1);
 }
 
 function isPositive (float $x) : bool
@@ -41,7 +41,7 @@ function randBinomial(int $n, int $k=2) : int
     $acc = 0;
 
     for ($i=0; $i<$n; $i++) {
-        $acc += rand(0, $k-1);
+        $acc += \rand(0, $k-1);
     }
 
     return $acc;

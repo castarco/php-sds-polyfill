@@ -119,14 +119,14 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
      */
     public function addDimension(int $position, bool $inPlace = false) : Tensor
     {
-        if ($position < 0 || $position > count($this->shape)) {
+        if ($position < 0 || $position > \count($this->shape)) {
             throw new ShapeMismatchException();
         }
 
         $t = $inPlace ? $this : clone $this;
 
         $shape = [];
-        for ($i=0; $i<count($this->shape); $i++) {
+        for ($i = 0; $i < \count($this->shape); $i++) {
             if ($i === $position) {
                 $shape[] = 1;
             }
@@ -409,7 +409,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
     {
         $t = $this->variance($dimsToCollapse, $keepRedundantDims);
 
-        if (is_scalar($t)) {
+        if (\is_scalar($t)) {
             return \sqrt($t);
         }
 
@@ -473,7 +473,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
     protected function setShape(array $shape)
     {
         $this->shape       = $shape;
-        $this->indexShifts = \array_fill(0, count($this->shape), 0);
+        $this->indexShifts = \array_fill(0, \count($this->shape), 0);
 
         $v = 1;
         for ($i=\count($shape)-1; $i >= 0; $i--) {
@@ -564,10 +564,10 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         $shape = [];
         $data = $source;
 
-        for ($i = $source; is_array($i); $i = $i[0]) {
-            $shape[] = count($i);
-            if (is_array($i[0])) {
-                $data = static::flattenNestedArray($data, count($i[0]));
+        for ($i = $source; \is_array($i); $i = $i[0]) {
+            $shape[] = \count($i);
+            if (\is_array($i[0])) {
+                $data = static::flattenNestedArray($data, \count($i[0]));
             }
         }
 
@@ -731,7 +731,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
      */
     private static function checkDimsSelector(&$dimsToCollapse, int $nDims)
     {
-        if (is_int($dimsToCollapse)) {
+        if (\is_int($dimsToCollapse)) {
             if ($dimsToCollapse < 0 || $dimsToCollapse >= $nDims) {
                 throw new \InvalidArgumentException();
             }
@@ -740,7 +740,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
             $tmp[$dimsToCollapse] = true;
             $dimsToCollapse = $tmp;
         }
-        elseif (is_array($dimsToCollapse)) {
+        elseif (\is_array($dimsToCollapse)) {
             if (\count($dimsToCollapse) !== $nDims) {
                 throw new ShapeMismatchException();
             }
@@ -760,10 +760,10 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         $flatArray = [];
 
         foreach ($data as $block) {
-            if (count($block) !== $levelSize) {
+            if (\count($block) !== $levelSize) {
                 throw new ShapeMismatchException();
             }
-            $flatArray = array_merge($flatArray, $block);
+            $flatArray = \array_merge($flatArray, $block);
         }
 
         return $flatArray;
