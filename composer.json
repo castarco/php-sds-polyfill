@@ -2,13 +2,15 @@
     "name": "php-sds/polyfill",
     "description": "A polyfill for the \"PHP Scientific Data Structures\" package.",
     "keywords": [
-        "tensor",
+        "DataFrame",
+        "ML",
+        "data analysis",
+        "data science",
+        "data structures",
+        "machine learning",
         "matrix",
         "ndarray",
-        "science",
-        "DataFrame",
-        "machine learning",
-        "ML"
+        "tensor"
     ],
     "license": "MIT",
     "authors": [

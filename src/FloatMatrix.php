@@ -175,6 +175,10 @@ final class FloatMatrix extends Matrix
      */
     public function get(int $i, int $j) : float
     {
+        if ($i < 0 || $i >= $this->height || $j < 0 || $j >= $this->width) {
+            throw new \OutOfBoundsException();
+        }
+
         return $this->data[$i * $this->width + $j];
     }
 
@@ -195,7 +199,7 @@ final class FloatMatrix extends Matrix
     public function setSlice(Matrix $m, array $sliceSpec)
     {
         if (isAssociativeArray($sliceSpec) || \count($sliceSpec) !== 2) {
-            throw new ShapeMismatchException();
+            throw new \OutOfRangeException();
         }
 
         list($sliceHeight, $sliceWidth) = $this->getNormalizedSliceSpec($sliceSpec);
@@ -223,7 +227,7 @@ final class FloatMatrix extends Matrix
     public function setArrayAsSlice(array $source, array $sliceSpec)
     {
         if (isAssociativeArray($sliceSpec) || \count($sliceSpec) !== 2) {
-            throw new ShapeMismatchException();
+            throw new \OutOfRangeException();
         }
 
         list($slice1stDim, $slice2ndDim) = $this->getNormalizedSliceSpec($sliceSpec);
@@ -262,17 +266,6 @@ final class FloatMatrix extends Matrix
         } else {
             throw new \InvalidArgumentException();
         }
-    }
-
-    /**
-     * @param int|float $c
-     * @return void
-     */
-    protected function initWithConstant($c = 0.0)
-    {
-        $this->data = new Vector(
-            \array_fill(0, $this->height*$this>$this->width, (float)$c)
-        );
     }
 
     // -----------------------------------------------------------------------------------------------------------------

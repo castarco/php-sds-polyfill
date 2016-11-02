@@ -47,13 +47,12 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
         $slice->setShape($this->getShapeFromSliceSpec($sliceSpec));
         $normalizedSliceSpec = $this->getNormalizedSliceSpec($sliceSpec);
 
-        $slice->initWithConstant(0);
-
-        $dataIndex = 0;
+        $slice->data = new Vector();
+        $slice->data->allocate($slice->height * $slice->width);
 
         for ($i=$normalizedSliceSpec[0][0]; $i<=$normalizedSliceSpec[0][1]; $i++) {
             for ($j=$normalizedSliceSpec[1][0]; $j<=$normalizedSliceSpec[1][1]; $j++) {
-                $slice->data[$dataIndex++] = $this->data[$i*$this->width + $j];
+                $slice->data->push($this->data[$i*$this->width + $j]);
             }
         }
 
@@ -75,19 +74,13 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
     protected function __construct(int $height = 1, int $width = 1)
     {
         if ($height < 1 || $width < 1) {
-            throw new \InvalidArgumentException();
+            throw new \DomainException();
         }
 
         $this->height = $height;
         $this->width  = $width;
         $this->shape  = [&$this->height, &$this->width];
     }
-
-    /**
-     * @param int|float $c
-     * @return void
-     */
-    protected abstract function initWithConstant($c = 0);
 
     /**
      * @param (null|int|int[])[] $sliceSpec
@@ -232,6 +225,9 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
     public function offsetGet($offset)
     {
         try {
+            if (\count($offset) !== 2) {
+                throw new \OutOfRangeException();
+            }
             return $this->get(...$offset);
         } catch (\TypeError $te) {
             return $this->slice($offset);

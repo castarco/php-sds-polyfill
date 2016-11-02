@@ -155,7 +155,7 @@ final class IntMatrix extends Matrix
     public function get(int $i, int $j) : int
     {
         if ($i < 0 || $i >= $this->height || $j < 0 || $j >= $this->width) {
-            throw new \InvalidArgumentException();
+            throw new \OutOfBoundsException();
         }
 
         return $this->data[$i * $this->width + $j];
@@ -169,7 +169,7 @@ final class IntMatrix extends Matrix
     public function set(int $value, int $i, int $j)
     {
         if ($i < 0 || $i >= $this->height || $j < 0 || $j >= $this->width) {
-            throw new \InvalidArgumentException();
+            throw new \OutOfBoundsException();
         }
 
         $this->data[$i * $this->width + $j] = $value;
@@ -182,7 +182,7 @@ final class IntMatrix extends Matrix
     public function setSlice(IntMatrix $m, array $sliceSpec)
     {
         if (isAssociativeArray($sliceSpec) || \count($sliceSpec) !== 2) {
-            throw new ShapeMismatchException();
+            throw new \OutOfRangeException();
         }
 
         list($slice1stDim, $slice2ndDim) = $this->getNormalizedSliceSpec($sliceSpec);
@@ -212,7 +212,7 @@ final class IntMatrix extends Matrix
     public function setArrayAsSlice(array $source, array $sliceSpec)
     {
         if (isAssociativeArray($sliceSpec) || \count($sliceSpec) !== 2) {
-            throw new ShapeMismatchException();
+            throw new \OutOfRangeException();
         }
 
         list($slice1stDim, $slice2ndDim) = $this->getNormalizedSliceSpec($sliceSpec);
@@ -251,17 +251,6 @@ final class IntMatrix extends Matrix
         } else {
             throw new \InvalidArgumentException();
         }
-    }
-
-    /**
-     * @param int|float $c
-     * @return void
-     */
-    protected function initWithConstant($c = 0)
-    {
-        $this->data = new Vector(
-            array_fill(0, $this->height * $this->width, (int)$c)
-        );
     }
 
     // -----------------------------------------------------------------------------------------------------------------

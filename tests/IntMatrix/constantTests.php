@@ -14,7 +14,6 @@ class __constructTests extends TestCase
     /**
      * @covers \SDS\IntMatrix::zeros
      * @covers \SDS\IntMatrix::constant
-     * @covers \SDS\IntMatrix::initWithConstant
      * @covers \SDS\Matrix::__construct
      * @covers \SDS\Matrix::setShape
      */
@@ -47,7 +46,7 @@ class __constructTests extends TestCase
      * @covers \SDS\IntMatrix::constant
      * @covers \SDS\Matrix::__construct
      *
-     * @expectedException \InvalidArgumentException
+     * @expectedException \DomainException
      */
     public function test_constructor_with_invalid_shape()
     {
