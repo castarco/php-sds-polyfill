@@ -271,6 +271,69 @@ final class FloatMatrix extends Matrix
         }
     }
 
+    /**
+     * @param bool $inPlace
+     * @param bool $toIntMatrix
+     * @return Matrix|IntMatrix|FloatMatrix
+     */
+    public function round(bool $inPlace = false, $toIntMatrix = false) : Matrix
+    {
+        if ($toIntMatrix) {
+            $roundM = new IntMatrix();
+            $roundM->setShape($this->shape);
+            $roundM->data = clone $this->data;
+
+        } else {
+            $roundM = $inPlace ? $this : clone $this;
+        }
+
+        $roundM->data->apply(function ($x) { return (int)\round($x); });
+
+        return $roundM;
+    }
+
+    /**
+     * @param bool $inPlace
+     * @param bool $toIntMatrix
+     * @return Matrix|IntMatrix|FloatMatrix
+     */
+    public function ceil(bool $inPlace = false, $toIntMatrix = false) : Matrix
+    {
+        if ($toIntMatrix) {
+            $ceilM = new IntMatrix();
+            $ceilM->setShape($this->shape);
+            $ceilM->data = clone $this->data;
+
+        } else {
+            $ceilM = $inPlace ? $this : clone $this;
+        }
+
+        $ceilM->data->apply(function ($x) { return (int)\ceil($x); });
+
+        return $ceilM;
+    }
+
+    /**
+     * @param bool $inPlace
+     * @param bool $toIntMatrix
+     * @return Matrix|IntMatrix|FloatMatrix
+     */
+    public function floor(bool $inPlace = false, $toIntMatrix = false) : Matrix
+    {
+        if ($toIntMatrix) {
+            $floorM = new IntMatrix();
+            $floorM->setShape($this->shape);
+            $floorM->data = clone $this->data;
+
+        } else {
+            $floorM = $inPlace ? $this : clone $this;
+        }
+
+        $floorM->data->apply(function ($x) { return (int)\floor($x); });
+
+        return $floorM;
+    }
+
     // -----------------------------------------------------------------------------------------------------------------
     // Core PHP interfaces methods
     // -----------------------------------------------------------------------------------------------------------------

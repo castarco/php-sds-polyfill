@@ -334,6 +334,69 @@ final class FloatTensor extends Tensor
     }
 
     /**
+     * @param bool $inPlace
+     * @param bool $toIntTensor
+     * @return Tensor|IntTensor|FloatTensor
+     */
+    public function round(bool $inPlace = false, $toIntTensor = false) : Tensor
+    {
+        if ($toIntTensor) {
+            $roundT = new IntTensor();
+            $roundT->setShape($this->shape);
+            $roundT->data = clone $this->data;
+
+        } else {
+            $roundT = $inPlace ? $this : clone $this;
+        }
+
+        $roundT->data->apply(function ($x) { return (int)\round($x); });
+
+        return $roundT;
+    }
+
+    /**
+     * @param bool $inPlace
+     * @param bool $toIntTensor
+     * @return Tensor|IntTensor|FloatTensor
+     */
+    public function ceil(bool $inPlace = false, $toIntTensor = false) : Tensor
+    {
+        if ($toIntTensor) {
+            $ceilT = new IntTensor();
+            $ceilT->setShape($this->shape);
+            $ceilT->data = clone $this->data;
+
+        } else {
+            $ceilT = $inPlace ? $this : clone $this;
+        }
+
+        $ceilT->data->apply(function ($x) { return (int)\ceil($x); });
+
+        return $ceilT;
+    }
+
+    /**
+     * @param bool $inPlace
+     * @param bool $toIntTensor
+     * @return Tensor|IntTensor|FloatTensor
+     */
+    public function floor(bool $inPlace = false, $toIntTensor = false) : Tensor
+    {
+        if ($toIntTensor) {
+            $floorT = new IntTensor();
+            $floorT->setShape($this->shape);
+            $floorT->data = clone $this->data;
+
+        } else {
+            $floorT = $inPlace ? $this : clone $this;
+        }
+
+        $floorT->data->apply(function ($x) { return (int)\floor($x); });
+
+        return $floorT;
+    }
+
+    /**
      * @param float $c
      */
     protected function initWithConstant($c = 0.0)
