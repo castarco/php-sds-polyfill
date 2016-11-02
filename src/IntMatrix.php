@@ -256,6 +256,136 @@ final class IntMatrix extends Matrix
         }
     }
 
+    /**
+     * @param bool $inPlace
+     * @return IntMatrix
+     */
+    public function neg(bool $inPlace = false) : IntMatrix
+    {
+        $negT = $inPlace ? $this : clone $this;
+
+        // TODO: Check if Vector::apply can be faster
+        foreach ($negT->data as $i => $v) {
+            $negT->data[$i] = -$negT->data[$i];
+        }
+
+        return $negT;
+    }
+
+    /**
+     * @param IntMatrix $m
+     * @param bool $inPlace
+     * @return IntMatrix
+     */
+    public function add(IntMatrix $m, bool $inPlace = false) : IntMatrix
+    {
+        if ($m->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $sumM = $inPlace ? $this : clone $this;
+        foreach ($sumM->data as $i => $v) {
+            $sumM->data[$i] += $m->data[$i];
+        }
+
+        return $sumM;
+    }
+
+    /**
+     * @param IntMatrix $m
+     * @param bool $inPlace
+     * @return IntMatrix
+     */
+    public function sub(IntMatrix $m, bool $inPlace = false) : IntMatrix
+    {
+        if ($m->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $subM = $inPlace ? $this : clone $this;
+        foreach ($subM->data as $i => $v) {
+            $subM->data[$i] -= $m->data[$i];
+        }
+
+        return $subM;
+    }
+
+    /**
+     * @param IntMatrix $m
+     * @param bool $inPlace
+     * @return IntMatrix
+     */
+    public function mul(IntMatrix $m, bool $inPlace = false) : IntMatrix
+    {
+        if ($m->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $mulT = $inPlace ? $this : clone $this;
+        foreach ($mulT->data as $i => $v) {
+            $mulT->data[$i] *= $m->data[$i];
+        }
+
+        return $mulT;
+    }
+
+    /**
+     * @param IntMatrix $m
+     * @param bool $inPlace
+     * @return IntMatrix
+     */
+    public function div(IntMatrix $m, bool $inPlace = false) : IntMatrix
+    {
+        if ($m->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $divM = $inPlace ? $this : clone $this;
+        foreach ($divM->data as $i => $v) {
+            $divM->data[$i] = \intdiv($v, $m->data[$i]);
+        }
+
+        return $divM;
+    }
+
+    /**
+     * @param IntMatrix $m
+     * @param bool $inPlace
+     * @return IntMatrix
+     */
+    public function mod(IntMatrix $m, bool $inPlace = false) : IntMatrix
+    {
+        if ($m->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $modM = $inPlace ? $this : clone $this;
+        foreach ($modM->data as $i => $v) {
+            $modM->data[$i] %= $m->data[$i];
+        }
+
+        return $modM;
+    }
+
+    /**
+     * @param IntMatrix $m
+     * @param bool $inPlace
+     * @return IntMatrix
+     */
+    public function pow(IntMatrix $m, bool $inPlace = false) : IntMatrix
+    {
+        if ($m->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $powM = $inPlace ? $this : clone $this;
+        foreach ($powM->data as $i => $v) {
+            $powM->data[$i] = (int)\pow($powM->data[$i], $m->data[$i]);
+        }
+
+        return $powM;
+    }
+
     // -----------------------------------------------------------------------------------------------------------------
     // Core PHP interfaces methods
     // -----------------------------------------------------------------------------------------------------------------

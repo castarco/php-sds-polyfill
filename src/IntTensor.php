@@ -306,12 +306,12 @@ final class IntTensor extends Tensor
             throw new ShapeMismatchException();
         }
 
-        $modT = $inPlace ? $this : clone $this;
-        foreach ($modT->data as $i => $v) {
-            $modT->data[$i] = (int)\pow($modT->data[$i], $t->data[$i]);
+        $powT = $inPlace ? $this : clone $this;
+        foreach ($powT->data as $i => $v) {
+            $powT->data[$i] = (int)\pow($powT->data[$i], $t->data[$i]);
         }
 
-        return $modT;
+        return $powT;
     }
 
     /**

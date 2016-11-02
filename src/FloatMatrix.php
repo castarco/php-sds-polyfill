@@ -273,6 +273,135 @@ final class FloatMatrix extends Matrix
 
     /**
      * @param bool $inPlace
+     * @return FloatMatrix
+     */
+    public function neg(bool $inPlace = false) : FloatMatrix
+    {
+        $negM = $inPlace ? $this : clone $this;
+
+        foreach ($negM->data as $i => $v) {
+            $negM->data[$i] = -$negM->data[$i];
+        }
+
+        return $negM;
+    }
+
+    /**
+     * @param Matrix $m
+     * @param bool $inPlace
+     * @return FloatMatrix
+     */
+    public function add(Matrix $m, bool $inPlace = false) : FloatMatrix
+    {
+        if ($m->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $sumM = $inPlace ? $this : clone $this;
+        foreach ($sumM->data as $i => $v) {
+            $sumM->data[$i] += (float)$m->data[$i];
+        }
+
+        return $sumM;
+    }
+
+    /**
+     * @param Matrix $m
+     * @param bool $inPlace
+     * @return FloatMatrix
+     */
+    public function sub(Matrix $m, bool $inPlace = false) : FloatMatrix
+    {
+        if ($m->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $subM = $inPlace ? $this : clone $this;
+        foreach ($subM->data as $i => $v) {
+            $subM->data[$i] -= (float)$m->data[$i];
+        }
+
+        return $subM;
+    }
+
+    /**
+     * @param Matrix $m
+     * @param bool $inPlace
+     * @return FloatMatrix
+     */
+    public function mul(Matrix $m, bool $inPlace = false) : FloatMatrix
+    {
+        if ($m->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $mulM = $inPlace ? $this : clone $this;
+        foreach ($mulM->data as $i => $v) {
+            $mulM->data[$i] *= (float)$m->data[$i];
+        }
+
+        return $mulM;
+    }
+
+    /**
+     * @param Matrix $t
+     * @param bool $inPlace
+     * @return FloatMatrix
+     */
+    public function div(Matrix $t, bool $inPlace = false) : FloatMatrix
+    {
+        if ($t->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $divM = $inPlace ? $this : clone $this;
+        foreach ($divM->data as $i => $v) {
+            $divM->data[$i] /= $t->data[$i];
+        }
+
+        return $divM;
+    }
+
+    /**
+     * @param Matrix $m
+     * @param bool $inPlace
+     * @return FloatMatrix
+     */
+    public function mod(Matrix $m, bool $inPlace = false) : FloatMatrix
+    {
+        if ($m->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $modM = $inPlace ? $this : clone $this;
+        foreach ($modM->data as $i => $v) {
+            $modM->data[$i] = \fmod($modM->data[$i], $m->data[$i]);
+        }
+
+        return $modM;
+    }
+
+    /**
+     * @param Matrix $m
+     * @param bool $inPlace
+     * @return FloatMatrix
+     */
+    public function pow(Matrix $m, bool $inPlace = false) : FloatMatrix
+    {
+        if ($m->shape !== $this->shape) {
+            throw new ShapeMismatchException();
+        }
+
+        $powM = $inPlace ? $this : clone $this;
+        foreach ($powM->data as $i => $v) {
+            $powM->data[$i] = (float)\pow($powM->data[$i], $m->data[$i]);
+        }
+
+        return $powM;
+    }
+
+    /**
+     * @param bool $inPlace
      * @param bool $toIntMatrix
      * @return Matrix|IntMatrix|FloatMatrix
      */
