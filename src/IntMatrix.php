@@ -188,10 +188,10 @@ final class IntMatrix extends Matrix
         list($slice1stDim, $slice2ndDim) = $this->getNormalizedSliceSpec($sliceSpec);
 
         if (
-            $slice2ndDim[0] < 0 || $slice2ndDim[1] >= $this->width ||
-            $slice1stDim[0] < 0 || $slice1stDim[1] >= $this->height  ||
-            1 + $slice2ndDim[1] - $slice2ndDim[0] !== $this->width ||
-            1 + $slice1stDim[1] - $slice1stDim[0] !== $this->height
+            $slice2ndDim[0] < 0 || $slice2ndDim[1] >= $this->width  ||
+            $slice1stDim[0] < 0 || $slice1stDim[1] >= $this->height ||
+            1 + $slice2ndDim[1] - $slice2ndDim[0] !== $m->width ||
+            1 + $slice1stDim[1] - $slice1stDim[0] !== $m->height
         ) {
             throw new ShapeMismatchException();
         }
@@ -221,8 +221,7 @@ final class IntMatrix extends Matrix
 
         if (
             $slice2ndDim[0] < 0 || $slice2ndDim[1] >= $this->width ||
-            $slice1stDim[0] < 0 || $slice1stDim[1] >= $this->height  ||
-            $sliceHeight !== $this->height || $sliceWidth  !== $this->width
+            $slice1stDim[0] < 0 || $slice1stDim[1] >= $this->height
         ) {
             throw new ShapeMismatchException();
         }
@@ -239,11 +238,15 @@ final class IntMatrix extends Matrix
                 }
             }
         } elseif (\is_array($source[0])) {
-            if (\count($source) !== $sliceHeight || \count($source[0]) !== $sliceWidth) {
+            if (\count($source) !== $sliceHeight) {
                 throw new ShapeMismatchException();
             }
 
             for ($i = $slice1stDim[0], $ix=0; $i <= $slice1stDim[1]; $i++, $ix++) {
+                if (\count($source[$ix]) !== $sliceWidth) {
+                    throw new ShapeMismatchException();
+                }
+
                 for ($j = $slice2ndDim[0], $jx=0; $j <= $slice2ndDim[1]; $j++, $jx++) {
                     $this->data[$i*$this->width + $j] = (int)$source[$ix][$jx];
                 }

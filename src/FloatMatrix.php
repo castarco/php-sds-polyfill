@@ -205,8 +205,8 @@ final class FloatMatrix extends Matrix
         list($sliceHeight, $sliceWidth) = $this->getNormalizedSliceSpec($sliceSpec);
 
         if (
-            1 + $sliceWidth[1]  - $sliceWidth[0]  !== $this->width ||
-            1 + $sliceHeight[1] - $sliceHeight[0] !== $this->height
+            1 + $sliceWidth[1]  - $sliceWidth[0]  !== $m->width ||
+            1 + $sliceHeight[1] - $sliceHeight[0] !== $m->height
         ) {
             throw new ShapeMismatchException();
         }
@@ -236,8 +236,7 @@ final class FloatMatrix extends Matrix
 
         if (
             $slice2ndDim[0] < 0 || $slice2ndDim[1] >= $this->width ||
-            $slice1stDim[0] < 0 || $slice1stDim[1] >= $this->height  ||
-            $sliceHeight !== $this->height || $sliceWidth  !== $this->width
+            $slice1stDim[0] < 0 || $slice1stDim[1] >= $this->height
         ) {
             throw new ShapeMismatchException();
         }
@@ -254,11 +253,15 @@ final class FloatMatrix extends Matrix
                 }
             }
         } elseif (\is_array($source[0])) {
-            if (\count($source) !== $sliceHeight || \count($source[0]) !== $sliceWidth) {
+            if (\count($source) !== $sliceHeight) {
                 throw new ShapeMismatchException();
             }
 
             for ($i = $slice1stDim[0], $ix=0; $i <= $slice1stDim[1]; $i++, $ix++) {
+                if (\count($source[$ix]) !== $sliceWidth) {
+                    throw new ShapeMismatchException();
+                }
+
                 for ($j = $slice2ndDim[0], $jx=0; $j <= $slice2ndDim[1]; $j++, $jx++) {
                     $this->data[$i*$this->width + $j] = (float)$source[$ix][$jx];
                 }
@@ -276,7 +279,7 @@ final class FloatMatrix extends Matrix
      */
     public function offsetSet($offset, $value)
     {
-        if ($value instanceof IntMatrix) {
+        if ($value instanceof Matrix) {
             $this->setSlice($value, $offset);
         } elseif (\is_array($value) && \count($value) > 0) {
             $this->setArrayAsSlice($value, $offset);
