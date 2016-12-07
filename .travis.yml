@@ -10,15 +10,23 @@ matrix:
     - php: 7.0
       env:
         - DS_EXTENSION=
+    - php: 7.1
+      env:
+        - DS_EXTENSION=
     - php: nightly
       env:
         - DS_EXTENSION=
+
     - php: 7.0
+      env:
+        - DS_EXTENSION=ds
+    - php: 7.1
       env:
         - DS_EXTENSION=ds
     - php: nightly
       env:
         - DS_EXTENSION=ds
+
     - php: hhvm-3.15
   allow_failures:
     - php: hhvm-3.15

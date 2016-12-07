@@ -7,12 +7,12 @@ namespace SDS\functions;
 
 function array_fMul (int ...$arr) : float
 {
-    return array_reduce($arr, 'SDS\functions\fMultiply', 1.0);
+    return \array_reduce($arr, 'SDS\functions\fMultiply', 1.0);
 }
 
 function array_iMul (int ...$arr) : int
 {
-    return array_reduce($arr, 'SDS\functions\iMultiply', 1);
+    return \array_reduce($arr, 'SDS\functions\iMultiply', 1);
 }
 
 function fMultiply (float $x, float $y) : float
