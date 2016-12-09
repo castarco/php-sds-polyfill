@@ -391,6 +391,7 @@ final class IntMatrix extends Matrix
     // -----------------------------------------------------------------------------------------------------------------
     /**
      * @inheritdoc
+     * @param int $value
      */
     public function offsetSet($offset, $value)
     {

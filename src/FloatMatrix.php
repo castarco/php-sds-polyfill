@@ -468,6 +468,7 @@ final class FloatMatrix extends Matrix
     // -----------------------------------------------------------------------------------------------------------------
     /**
      * @inheritdoc
+     * @param int|float $value
      */
     public function offsetSet($offset, $value)
     {

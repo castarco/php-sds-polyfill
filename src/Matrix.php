@@ -67,6 +67,41 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
     public abstract function get(int $i, int $j);
 
     /**
+     * @param Matrix $b
+     * @return Matrix
+     */
+    public function matMul(Matrix $b) : Matrix
+    {
+        list($m, $n) = $this->shape;
+        list($p, $q) = $b->shape;
+
+        if ($n !== $p) {
+            throw new ShapeMismatchException();
+        }
+
+        $newMat = ($this instanceof IntMatrix && $b instanceof IntMatrix)
+            ? new IntMatrix($m, $q)
+            : new FloatMatrix($m, $q);
+        $newMatData = new Vector(\array_fill(0, $m * $q, 0));
+
+        $tD = $this->data;
+        $bD = $b->data;
+
+        // TODO: use Strassen's algorithm?
+        for ($i = 0, $in = 0, $w = 0; $i < $m; $i++, $in += $n) {
+            for ($j = 0; $j < $q; $j++, $w++) {
+                for ($k = 0, $kq = 0; $k < $n; $k++, $kq += $q) {
+                    $newMatData[$w] += $tD[$in + $k] * $bD[$kq + $j];
+                }
+            }
+        }
+
+        $newMat->data = $newMatData;
+
+        return $newMat;
+    }
+
+    /**
      * Matrix constructor.
      * @param int $height
      * @param int $width
