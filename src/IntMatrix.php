@@ -53,6 +53,56 @@ final class IntMatrix extends Matrix
     }
 
     /**
+     * @param int $size
+     * @param int $v
+     * @return IntMatrix
+     */
+    public static function diagonal(int $size, int $v = 1) : IntMatrix
+    {
+        if ($size <= 0) {
+            throw new \DomainException('Matrix size must be strictly positive');
+        }
+
+        $mSize = $size * $size;
+        $data = new Vector(\array_fill(0, $mSize, 0));
+
+        for ($i = 0; $i < $mSize; $i += $size + 1) {
+            $data[$i] = $v;
+        }
+
+        $m = new IntMatrix($size, $size);
+        $m->data = $data;
+
+        return $m;
+    }
+
+    /**
+     * @param int[] ...$vec
+     * @return IntMatrix
+     */
+    public static function vectorToDiagonal(int ...$vec) : IntMatrix
+    {
+        $size = \count($vec);
+
+        if ($size === 0) {
+            throw new \DomainException('Matrix size must be strictly positive');
+        }
+
+        $data = new Vector(\array_fill(0, $size * $size, 0));
+
+        $i = 0;
+        foreach ($vec as $v) {
+            $data[$i] = $v;
+            $i += $size + 1;
+        }
+
+        $m = new IntMatrix($size, $size);
+        $m->data = $data;
+
+        return $m;
+    }
+
+    /**
      * @param int $height
      * @param int $width
      * @param int $maxL

@@ -79,14 +79,12 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
             throw new ShapeMismatchException();
         }
 
-        $newMat = ($this instanceof IntMatrix && $b instanceof IntMatrix)
-            ? new IntMatrix($m, $q)
-            : new FloatMatrix($m, $q);
         $newMatData = new Vector(\array_fill(0, $m * $q, 0));
-
         $tD = $this->data;
         $bD = $b->data;
 
+        // TODO: experiment with the order "j, k, i" to reduce cache misses:
+        //       https://stackoverflow.com/questions/13312625/cache-friendly-method-to-multiply-two-matrices
         // TODO: use Strassen's algorithm?
         for ($i = 0, $in = 0, $w = 0; $i < $m; $i++, $in += $n) {
             for ($j = 0; $j < $q; $j++, $w++) {
@@ -96,6 +94,9 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
             }
         }
 
+        $newMat = ($this instanceof IntMatrix && $b instanceof IntMatrix)
+            ? new IntMatrix($m, $q)
+            : new FloatMatrix($m, $q);
         $newMat->data = $newMatData;
 
         return $newMat;

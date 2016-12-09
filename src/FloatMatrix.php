@@ -50,6 +50,56 @@ final class FloatMatrix extends Matrix
     }
 
     /**
+     * @param int $size
+     * @param float $v
+     * @return FloatMatrix
+     */
+    public static function diagonal(int $size, float $v = 1.0) : FloatMatrix
+    {
+        if ($size <= 0) {
+            throw new \DomainException('Matrix size must be strictly positive');
+        }
+
+        $mSize = $size * $size;
+        $data = new Vector(\array_fill(0, $mSize, 0.0));
+
+        for ($i = 0; $i < $mSize; $i += $size + 1) {
+            $data[$i] = $v;
+        }
+
+        $m = new FloatMatrix($size, $size);
+        $m->data = $data;
+
+        return $m;
+    }
+
+    /**
+     * @param float[] ...$vec
+     * @return FloatMatrix
+     */
+    public static function vectorToDiagonal(float ...$vec) : FloatMatrix
+    {
+        $size = \count($vec);
+
+        if ($size === 0) {
+            throw new \DomainException('Matrix size must be strictly positive');
+        }
+
+        $data = new Vector(\array_fill(0, $size * $size, 0.0));
+
+        $i = 0;
+        foreach ($vec as $v) {
+            $data[$i] = $v;
+            $i += $size + 1;
+        }
+
+        $m = new FloatMatrix($size, $size);
+        $m->data = $data;
+
+        return $m;
+    }
+
+    /**
      * @param int $height
      * @param int $width
      * @param float $maxL

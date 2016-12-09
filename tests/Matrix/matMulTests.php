@@ -75,6 +75,34 @@ class matMulTests extends TestCase
 
     /**
      * @covers \SDS\Matrix::matMul
+     */
+    public function test_identity_matrix()
+    {
+        $a = IntMatrix::fromArray([
+            [1,  2,  3,  4],
+            [5,  6,  7,  8],
+            [9, 10, 11, 12]
+        ]);
+
+        $b = IntMatrix::fromArray([
+            [13, 14],
+            [15, 16],
+            [17, 18],
+            [19, 20]
+        ]);
+
+        $i1 = IntMatrix::diagonal(3, 1);
+        $i2 = IntMatrix::diagonal(4, 1);
+        $i3 = IntMatrix::diagonal(2, 1);
+
+        $this->assertTrue($a->equals($i1->matMul($a)));
+        $this->assertTrue($a->equals($a->matMul($i2)));
+        $this->assertTrue($b->equals($i2->matMul($b)));
+        $this->assertTrue($b->equals($b->matMul($i3)));
+    }
+
+    /**
+     * @covers \SDS\Matrix::matMul
      *
      * @expectedException \SDS\Exceptions\ShapeMismatchException
      */
