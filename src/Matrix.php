@@ -102,6 +102,25 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
         return $newMat;
     }
 
+    public function transpose() : Matrix
+    {
+        list($m, $n) = $this->shape;
+
+        $tData = $this->data;
+        $newMatData = new Vector(\array_fill(0, $m * $n, 0));
+
+        for ($i = 0, $in = 0; $i < $m; $i++, $in += $n)  {
+            for ($j = 0, $jm = 0; $j < $n; $j++, $jm += $m) {
+                $newMatData[$jm + $i] = $tData[$in + $j];
+            }
+        }
+
+        $newMat = new static($n, $m);
+        $newMat->data = $newMatData;
+
+        return $newMat;
+    }
+
     /**
      * Matrix constructor.
      * @param int $height
