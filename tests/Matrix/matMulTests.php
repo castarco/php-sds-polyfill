@@ -103,6 +103,40 @@ class matMulTests extends TestCase
 
     /**
      * @covers \SDS\Matrix::matMul
+     */
+    public function test_overPreviousMatrix()
+    {
+        $a = IntMatrix::fromArray([
+            [1, 2],
+            [3, 4],
+            [5, 6]
+        ]);
+
+        $b = IntMatrix::fromArray([
+            [7,   8,  9],
+            [10, 11, 12]
+        ]);
+
+        $c = IntMatrix::diagonal(3);
+
+        // We reuse the $c's assigned memory to store a new result instead of reserving more memory.
+        $a->matMul($b, $c);
+
+        $this->assertEquals([3, 3], $c->getShape());
+
+        $this->assertEquals(1*7 + 2*10, $c[[0, 0]]);
+        $this->assertEquals(3*7 + 4*10, $c[[1, 0]]);
+        $this->assertEquals(5*7 + 6*10, $c[[2, 0]]);
+        $this->assertEquals(1*8 + 2*11, $c[[0, 1]]);
+        $this->assertEquals(3*8 + 4*11, $c[[1, 1]]);
+        $this->assertEquals(5*8 + 6*11, $c[[2, 1]]);
+        $this->assertEquals(1*9 + 2*12, $c[[0, 2]]);
+        $this->assertEquals(3*9 + 4*12, $c[[1, 2]]);
+        $this->assertEquals(5*9 + 6*12, $c[[2, 2]]);
+    }
+
+    /**
+     * @covers \SDS\Matrix::matMul
      *
      * @expectedException \SDS\Exceptions\ShapeMismatchException
      */

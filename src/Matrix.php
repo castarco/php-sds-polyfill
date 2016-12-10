@@ -68,9 +68,12 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
 
     /**
      * @param Matrix $b
+     * @param null|Matrix $dst
      * @return Matrix
+     *
+     * @throws \TypeError when $dst does not math the operands types
      */
-    public function matMul(Matrix $b) : Matrix
+    public function matMul(Matrix $b, Matrix $dst = null) : Matrix
     {
         list($m, $n) = $this->shape;
         list($p, $q) = $b->shape;
@@ -80,7 +83,25 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
         }
 
         $mSize = $m * $q;
-        $newMatData = new Vector(\array_fill(0, $mSize, 0));
+
+        if (null === $dst) {
+            $dst = ($this instanceof IntMatrix && $b instanceof IntMatrix)
+                ? new IntMatrix($m, $q)
+                : new FloatMatrix($m, $q);
+            $newMatData = new Vector(\array_fill(0, $mSize, 0));
+            $dst->data = $newMatData;
+        } else {
+            if ($dst->height !== $m || $dst->width !== $q) {
+                throw new ShapeMismatchException();
+            } elseif ($dst instanceof IntMatrix && ($this instanceof FloatMatrix || $b instanceof FloatMatrix)) {
+                throw new \TypeError('Expected $dst to be FloatMatrix');
+            } elseif ($dst instanceof FloatMatrix && $this instanceof IntMatrix && $b instanceof IntMatrix) {
+                throw new \TypeError('Expected $dst to be IntMatrix');
+            }
+            $newMatData = $dst->data;
+            $newMatData->apply(function () { return 0; });
+        }
+
         $tD = $this->data;
         $bD = $b->data;
 
@@ -94,12 +115,7 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
             }
         }
 
-        $newMat = ($this instanceof IntMatrix && $b instanceof IntMatrix)
-            ? new IntMatrix($m, $q)
-            : new FloatMatrix($m, $q);
-        $newMat->data = $newMatData;
-
-        return $newMat;
+        return $dst;
     }
 
     public function transpose() : Matrix
