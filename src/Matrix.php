@@ -79,17 +79,17 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
             throw new ShapeMismatchException();
         }
 
-        $newMatData = new Vector(\array_fill(0, $m * $q, 0));
+        $mSize = $m * $q;
+        $newMatData = new Vector(\array_fill(0, $mSize, 0));
         $tD = $this->data;
         $bD = $b->data;
 
-        // TODO: experiment with the order "j, k, i" to reduce cache misses:
-        //       https://stackoverflow.com/questions/13312625/cache-friendly-method-to-multiply-two-matrices
         // TODO: use Strassen's algorithm?
-        for ($i = 0, $in = 0, $w = 0; $i < $m; $i++, $in += $n) {
-            for ($j = 0; $j < $q; $j++, $w++) {
-                for ($k = 0, $kq = 0; $k < $n; $k++, $kq += $q) {
-                    $newMatData[$w] += $tD[$in + $k] * $bD[$kq + $j];
+        for ($j = 0; $j < $q; $j++) {
+            for ($k = 0, $kq = 0; $k < $n; $k++, $kq += $q) {
+                $t = $bD[$kq + $j];
+                for ($iq = 0, $in = 0; $iq < $mSize; $iq += $q, $in += $n) {
+                    $newMatData[$iq + $j] += $tD[$in + $k] * $t;
                 }
             }
         }
