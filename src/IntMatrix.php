@@ -55,22 +55,24 @@ final class IntMatrix extends Matrix
     /**
      * @param int $size
      * @param int $v
+     * @param null|int $width
      * @return IntMatrix
      */
-    public static function diagonal(int $size, int $v = 1) : IntMatrix
+    public static function eye(int $size, int $v = 1, int $width = null) : IntMatrix
     {
         if ($size <= 0) {
             throw new \DomainException('Matrix size must be strictly positive');
         }
 
-        $mSize = $size * $size;
-        $data = new Vector(\array_fill(0, $mSize, 0));
+        $width = $width ?? $size;
+        $data = new Vector(\array_fill(0, $size * $width, 0));
 
-        for ($i = 0; $i < $mSize; $i += $size + 1) {
+        $mSize = \min($width, $size) * $width;
+        for ($i = 0; $i < $mSize; $i += $width + 1) {
             $data[$i] = $v;
         }
 
-        $m = new IntMatrix($size, $size);
+        $m = new IntMatrix($size, $width);
         $m->data = $data;
 
         return $m;
@@ -80,7 +82,7 @@ final class IntMatrix extends Matrix
      * @param int[] ...$vec
      * @return IntMatrix
      */
-    public static function vectorToDiagonal(int ...$vec) : IntMatrix
+    public static function diagonal(int ...$vec) : IntMatrix
     {
         $size = \count($vec);
 

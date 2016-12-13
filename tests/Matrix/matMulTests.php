@@ -91,9 +91,9 @@ class matMulTests extends TestCase
             [19, 20]
         ]);
 
-        $i1 = IntMatrix::diagonal(3, 1);
-        $i2 = IntMatrix::diagonal(4, 1);
-        $i3 = IntMatrix::diagonal(2, 1);
+        $i1 = IntMatrix::eye(3, 1);
+        $i2 = IntMatrix::eye(4, 1);
+        $i3 = IntMatrix::eye(2, 1);
 
         $this->assertTrue($a->equals($i1->matMul($a)));
         $this->assertTrue($a->equals($a->matMul($i2)));
@@ -117,7 +117,7 @@ class matMulTests extends TestCase
             [10, 11, 12]
         ]);
 
-        $c = IntMatrix::diagonal(3);
+        $c = IntMatrix::eye(3);
 
         // We reuse the $c's assigned memory to store a new result instead of reserving more memory.
         $a->matMul($b, $c);

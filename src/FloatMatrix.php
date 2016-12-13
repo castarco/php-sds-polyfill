@@ -52,22 +52,24 @@ final class FloatMatrix extends Matrix
     /**
      * @param int $size
      * @param float $v
+     * @param null|int $width
      * @return FloatMatrix
      */
-    public static function diagonal(int $size, float $v = 1.0) : FloatMatrix
+    public static function eye(int $size, float $v = 1.0, int $width = null) : FloatMatrix
     {
         if ($size <= 0) {
             throw new \DomainException('Matrix size must be strictly positive');
         }
 
-        $mSize = $size * $size;
-        $data = new Vector(\array_fill(0, $mSize, 0.0));
+        $width = $width ?? $size;
+        $data = new Vector(\array_fill(0, $size * $width, 0.0));
 
-        for ($i = 0; $i < $mSize; $i += $size + 1) {
+        $mSize = \min($width, $size) * $width;
+        for ($i = 0; $i < $mSize; $i += $width + 1) {
             $data[$i] = $v;
         }
 
-        $m = new FloatMatrix($size, $size);
+        $m = new FloatMatrix($size, $width);
         $m->data = $data;
 
         return $m;
@@ -77,7 +79,7 @@ final class FloatMatrix extends Matrix
      * @param float[] ...$vec
      * @return FloatMatrix
      */
-    public static function vectorToDiagonal(float ...$vec) : FloatMatrix
+    public static function diagonal(float ...$vec) : FloatMatrix
     {
         $size = \count($vec);
 
@@ -213,6 +215,53 @@ final class FloatMatrix extends Matrix
         } else {
             throw new \InvalidArgumentException();
         }
+    }
+
+    /**
+     * Creates a Householder matrix using a vector.
+     * The Householder matrix "reflects" vectors using a normal plane to the given vector.
+     *
+     * @param Matrix $a
+     * @return FloatMatrix
+     */
+    public static function householder(Matrix $a) : FloatMatrix
+    {
+        if ($a->width !== 1) {
+            throw new ShapeMismatchException('Only "vertical" vectors are allowed');
+        }
+
+        $aData = $a->data;
+        $n = $aData->count();
+
+        $aSqNorm = 0.0;
+        foreach ($aData as $x) {
+            $aSqNorm += $x*$x;
+        }
+
+        $a0 = $aData[0];
+        $d = $a0 + \sqrt($aSqNorm) * ($a0 >= 0 ? 1 : -1);
+
+        $v = $aData->map(function ($x) use ($d) {
+            return $x / $d;
+        });
+        $v[0] = 1.0;
+
+        $d2 = 0.0;
+        foreach ($v as $x) {
+            $d2 += $x*$x;
+        }
+        $d2 = 2. / $d2;
+
+        $H = FloatMatrix::eye($n);
+        $hData = $H->data;
+
+        for ($i = 0, $in = 0; $i < $n; $i++, $in += $n) {
+            for ($j = 0; $j < $n; $j++) {
+                $hData[$in + $j] -= $d2 * $v[$i] * $v[$j];
+            }
+        }
+
+        return $H;
     }
 
     // -----------------------------------------------------------------------------------------------------------------

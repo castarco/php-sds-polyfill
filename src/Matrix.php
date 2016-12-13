@@ -60,6 +60,29 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
     }
 
     /**
+     * @param callable $fn
+     * @return Matrix
+     */
+    public function apply(callable $fn)
+    {
+        $this->data->apply($fn);
+
+        return $this;
+    }
+
+    /**
+     * @param callable $fn
+     * @return Matrix
+     */
+    public function map(callable $fn) : Matrix
+    {
+        $t = clone $this;
+        $t->data->apply($fn);
+
+        return $t;
+    }
+
+    /**
      * @param int $i
      * @param int $j
      * @return int|float
@@ -118,6 +141,12 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
         return $dst;
     }
 
+    /**
+     * @return Matrix
+     *
+     * TODO: Add in-place transposition
+     * TODO: Add "symbolic" transposition (no transposition at all!)
+     */
     public function transpose() : Matrix
     {
         list($m, $n) = $this->shape;
@@ -138,6 +167,59 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
     }
 
     /**
+     * @param bool $getQ
+     * @return Matrix[] [$Q, $R]
+     */
+    public function qrDecomposition(bool $getQ = true) : array
+    {
+        list($m, $n) = $this->shape;
+        $k = \min($m, $n);
+
+        $Q  = $getQ ? FloatMatrix::eye($m, 1.0, $k) : null;
+        $R  = FloatMatrix::eye($k, 1.0, $m)->matMul($this);
+        $H1 = FloatMatrix::eye($k);
+
+        for ($i = 0; $i < $k; $i++) {
+            $H = clone $H1;
+            $slice = [$i, $k - 1];
+            $H[[ $slice, $slice ]] = (
+                FloatMatrix::householder($R[[ $slice, $i ]])
+            );
+
+            $Q = $getQ ? $Q->matMul($H) : null;
+            $R = $H->matMul($R);
+        }
+
+        return [$Q, $R];
+    }
+
+    public function isSquare() : bool
+    {
+        return ($this->width === $this->height);
+    }
+
+    /**
+     * @return int|float
+     */
+    public function trace()
+    {
+        $w = $this->width;
+        if (($this->width !== $this->height)) {
+            throw new ShapeMismatchException('The trace only can be computed over square matrix');
+        }
+
+        $mSize = $w * $w;
+        $data = $this->data;
+        $acc = 0;
+
+        for ($i = 0; $i < $mSize; $i += $w + 1) {
+            $acc += $data[$i];
+        }
+
+        return $acc;
+    }
+
+    /**
      * Matrix constructor.
      * @param int $height
      * @param int $width
@@ -155,10 +237,9 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
 
     /**
      * @param (null|int|int[])[] $sliceSpec
-     * @param bool $keepRedundantDims
      * @return int[]
      */
-    protected function getShapeFromSliceSpec(array $sliceSpec, bool $keepRedundantDims=false) : array
+    protected function getShapeFromSliceSpec(array $sliceSpec) : array
     {
         $this->checkSliceSpec($sliceSpec);
 
@@ -167,7 +248,7 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
         foreach ($sliceSpec as $dimIndex => $sComp) {
             if (null === $sComp) {
                 $shape[] = $this->shape[$dimIndex];
-            } elseif ($keepRedundantDims && \is_int($sComp)) {
+            } elseif (\is_int($sComp)) {
                 $shape[] = 1;
             } elseif (\is_array($sComp)) {
                 $shape[] = 1 + $sComp[1] - $sComp[0];
@@ -217,12 +298,12 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
             return (
                 null === $sComp ||
 
-                \is_int($sComp) && $sComp > 0 && $sComp < $this->shape[$dimIndex] ||
+                \is_int($sComp) && $sComp >= 0 && $sComp < $this->shape[$dimIndex] ||
 
                 (
                     \is_array($sComp) && \count($sComp) === 2 &&
                     \is_int($sComp[0]) && $sComp[0] >= 0 &&
-                    \is_int($sComp[1]) && $sComp[1] > $sComp[0] && $sComp[1] < $this->shape[$dimIndex]
+                    \is_int($sComp[1]) && $sComp[1] >= $sComp[0] && $sComp[1] < $this->shape[$dimIndex]
                 )
             );
         }, ARRAY_FILTER_USE_BOTH));
@@ -246,17 +327,34 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
     /**
      * @inheritdoc
      */
-    public function equals($obj) : bool
+    public function equals($obj, $epsilon = null) : bool
     {
-        return (
-            $obj === $this ||
-            (
-                \get_class($obj) === \get_class($this) &&
-                $obj->height === $this->height &&
-                $obj->width  === $this->width  &&
-                $obj->data->toArray()  === $this->data->toArray()
-            )
-        );
+        if ($obj === $this) {
+            return true;
+        } elseif (
+            \get_class($obj) !== \get_class($this) ||
+            $obj->height !== $this->height ||
+            $obj->width  !== $this->width
+        ) {
+            return false;
+        }
+
+        $tD = $this->data;
+        /** @var Vector $oD */
+        $oD = $obj->data;
+
+        if (null === $epsilon) {
+            return ($oD->toArray() === $tD->toArray());
+        }
+
+        $n = $tD->count();
+        for ($i = 0; $i < $n; $i++) {
+            $a = $tD[$i];
+            $b = $oD[$i];
+            if (\abs($a - $b)/( \max(\abs($a), \abs($b)) + $epsilon) > $epsilon) return false;
+        }
+
+        return true;
     }
 
     /**

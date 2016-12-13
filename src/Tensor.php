@@ -652,7 +652,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
                 (
                     \is_array($sComp) && \count($sComp) === 2 &&
                     \is_int($sComp[0]) && $sComp[0] >= 0 &&
-                    \is_int($sComp[1]) && $sComp[1] > $sComp[0] && $sComp[1] < $this->shape[$dimIndex]
+                    \is_int($sComp[1]) && $sComp[1] >= $sComp[0] && $sComp[1] < $this->shape[$dimIndex]
                 )
             );
         }, ARRAY_FILTER_USE_BOTH));
