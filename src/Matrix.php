@@ -129,11 +129,11 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
         $bD = $b->data;
 
         // TODO: use Strassen's algorithm?
-        for ($j = 0; $j < $q; $j++) {
+        for ($iq = 0, $in = 0; $iq < $mSize; $iq += $q, $in += $n) {
             for ($k = 0, $kq = 0; $k < $n; $k++, $kq += $q) {
-                $t = $bD[$kq + $j];
-                for ($iq = 0, $in = 0; $iq < $mSize; $iq += $q, $in += $n) {
-                    $newMatData[$iq + $j] += $tD[$in + $k] * $t;
+                $t = $tD[$in + $k];
+                for ($j = 0; $j < $q; $j++) {
+                    $newMatData[$iq + $j] += $t * $bD[$kq + $j];
                 }
             }
         }
@@ -182,9 +182,7 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
         for ($i = 0; $i < $k; $i++) {
             $H = clone $H1;
             $slice = [$i, $k - 1];
-            $H[[ $slice, $slice ]] = (
-                FloatMatrix::householder($R[[ $slice, $i ]])
-            );
+            $H[[$slice, $slice]] = FloatMatrix::householder($R[[$slice, $i]]);
 
             $Q = $getQ ? $Q->matMul($H) : null;
             $R = $H->matMul($R);
