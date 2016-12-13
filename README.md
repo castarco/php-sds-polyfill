@@ -16,8 +16,8 @@ The SDS library provides the following classes (mainly ported from Python (SciPy
     * `IntTensor`
     * `FloatTensor`
   * `Matrix` (abstract):
-    * `IntMatrix` : Not yet implemented
-    * `FloatMatrix` : Not yet implemented
+    * `IntMatrix` : Not yet completed (but usable!)
+    * `FloatMatrix` : Not yet completed (but usable!)
   * `DataFrame` : Not yet implemented
   * `Series` : Not yet implemented
 
