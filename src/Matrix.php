@@ -122,7 +122,15 @@ abstract class Matrix implements \ArrayAccess, \Countable, \IteratorAggregate, H
                 throw new \TypeError('Expected $dst to be IntMatrix');
             }
             $newMatData = $dst->data;
-            $newMatData->apply(function () { return 0; });
+
+            // Hack to improve performance while \Ds\Vector does not have a `fill` method.
+            if (\extension_loaded('ds')) {
+                for ($i = 0; $i < $mSize; $i++) {
+                    $newMatData[$i] = 0;
+                }
+            } else {
+                $newMatData->apply(function () { return 0; });
+            }
         }
 
         $tD = $this->data;
