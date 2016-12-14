@@ -8,9 +8,6 @@ namespace SDS;
 use Ds\Vector;
 
 use SDS\Exceptions\ShapeMismatchException;
-use function SDS\functions\ {
-    array_iMul
-};
 
 
 final class FloatTensor extends Tensor
@@ -65,7 +62,7 @@ final class FloatTensor extends Tensor
         $t = new FloatTensor();
         $t->setShape($shape);
 
-        $dataSize = array_iMul(...$shape);
+        $dataSize = (int)\array_product($shape);
         $t->data = new Vector();
         $t->data->allocate($dataSize);
 
@@ -90,7 +87,7 @@ final class FloatTensor extends Tensor
         $t = new FloatTensor();
         $t->setShape($shape);
 
-        $dataSize = array_iMul(...$shape);
+        $dataSize = (int)\array_product($shape);
         $t->data = new Vector();
         $t->data->allocate($dataSize);
 
@@ -185,7 +182,7 @@ final class FloatTensor extends Tensor
         $targetSliceShape = $this->getShapeFromSliceSpec($sliceSpec, true);
 
         if (\is_float($source[0]) || \is_int($source[0])) {
-            if (\count($source) !== array_iMul(...$targetSliceShape)) {
+            if (\count($source) !== \array_product($targetSliceShape)) {
                 throw new ShapeMismatchException();
             }
         } else {
@@ -402,7 +399,7 @@ final class FloatTensor extends Tensor
     protected function initWithConstant($c = 0.0)
     {
         $this->data = new Vector(
-            \array_fill(0, array_iMul(...$this->shape), (float)$c)
+            \array_fill(0, \array_product($this->shape), (float)$c)
         );
     }
 
@@ -414,7 +411,7 @@ final class FloatTensor extends Tensor
     protected static function fromArrayWithForcedShape(array $shape, float ...$source) : FloatTensor
     {
         self::checkShape(...$shape);
-        if (array_iMul(...$shape) !== \count($source)) {
+        if (\array_product($shape) !== \count($source)) {
             throw new ShapeMismatchException();
         }
 

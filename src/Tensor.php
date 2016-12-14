@@ -11,9 +11,7 @@ use SDS\Exceptions\InvalidPermutationException;
 use SDS\Exceptions\ShapeMismatchException;
 
 use function SDS\functions\ {
-    array_iMul,
-    isAssociativeArray,
-    isPositive
+    isAssociativeArray
 };
 
 
@@ -88,7 +86,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
     {
         self::checkShape(...$shape);
 
-        if (array_iMul(...$shape) !== array_iMul(...$this->shape)) {
+        if (\array_product($shape) !== \array_product($this->shape)) {
             throw new ShapeMismatchException();
         }
 
@@ -160,7 +158,7 @@ abstract class Tensor implements \ArrayAccess, \Countable, \IteratorAggregate, H
         $t = new static();
         $t->setShape($newShape);
         $t->data = new Vector();
-        $t->data->allocate(array_iMul(...$newShape));
+        $t->data->allocate((int)\array_product($newShape));
 
         do {
             $t->data->push($this->get(...\array_map(

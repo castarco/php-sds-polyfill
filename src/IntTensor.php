@@ -9,7 +9,6 @@ use Ds\Vector;
 
 use SDS\Exceptions\ShapeMismatchException;
 use function SDS\functions\ {
-    array_iMul,
     randBinomial
 };
 
@@ -66,7 +65,7 @@ final class IntTensor extends Tensor
         $t = new IntTensor();
         $t->setShape($shape);
 
-        $dataSize = array_iMul(...$shape);
+        $dataSize = (int)\array_product($shape);
         $t->data = new Vector();
         $t->data->allocate($dataSize);
 
@@ -89,7 +88,7 @@ final class IntTensor extends Tensor
         $t = new IntTensor();
         $t->setShape($shape);
 
-        $dataSize = array_iMul(...$shape);
+        $dataSize = (int)\array_product($shape);
         $t->data = new Vector();
         $t->data->allocate($dataSize);
 
@@ -165,7 +164,7 @@ final class IntTensor extends Tensor
         $targetSliceShape = $this->getShapeFromSliceSpec($sliceSpec, true);
 
         if (\is_int($source[0])) {
-            if (\count($source) !== array_iMul(...$targetSliceShape)) {
+            if (\count($source) !== \array_product($targetSliceShape)) {
                 throw new ShapeMismatchException();
             }
         } else {
@@ -320,7 +319,7 @@ final class IntTensor extends Tensor
     protected function initWithConstant($c = 0)
     {
         $this->data = new Vector(
-            \array_fill(0, array_iMul(...$this->shape), (int)$c)
+            \array_fill(0, \array_product($this->shape), (int)$c)
         );
     }
 
@@ -332,7 +331,7 @@ final class IntTensor extends Tensor
     protected static function fromArrayWithForcedShape(array $shape, int ...$source) : IntTensor
     {
         self::checkShape(...$shape);
-        if (array_iMul(...$shape) !== \count($source)) {
+        if (\array_product($shape) !== \count($source)) {
             throw new ShapeMismatchException();
         }
 
