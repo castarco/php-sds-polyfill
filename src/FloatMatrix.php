@@ -186,7 +186,7 @@ final class FloatMatrix extends Matrix
             $m = new FloatMatrix($height, $width);
 
             $m->data = new Vector($source);
-            $m->data->apply(function ($x) { return (float)$x; });
+            $m->data->apply(function ($x) : float { return (float)$x; });
 
             return $m;
 
@@ -209,7 +209,7 @@ final class FloatMatrix extends Matrix
                 }
                 $m->data->push(...$source[$i]);
             }
-            $m->data->apply(function ($x) { return (float)$x; });
+            $m->data->apply(function ($x) : float { return (float)$x; });
 
             return $m;
         } else {
@@ -252,10 +252,12 @@ final class FloatMatrix extends Matrix
         }
         $d2 = 2. / $d2;
 
-        $H = FloatMatrix::eye($n);
-        $hData = $H->data;
+        $H = new FloatMatrix($n, $n);
+        $hData = new Vector(\array_fill(0, $n * $n, 0.0));
+        $H->data = $hData;
 
         for ($i = 0, $in = 0; $i < $n; $i++, $in += $n) {
+            $hData[$in + $i] = 1.0;
             for ($j = 0; $j < $n; $j++) {
                 $hData[$in + $j] -= $d2 * $v[$i] * $v[$j];
             }
@@ -515,7 +517,10 @@ final class FloatMatrix extends Matrix
             $roundM = $inPlace ? $this : clone $this;
         }
 
-        $roundM->data->apply(function ($x) { return (int)\round($x); });
+        $roundM->data->apply($toIntMatrix
+            ? function ($x) : int { return (int)\round($x); }
+            : 'round'
+        );
 
         return $roundM;
     }
@@ -536,7 +541,10 @@ final class FloatMatrix extends Matrix
             $ceilM = $inPlace ? $this : clone $this;
         }
 
-        $ceilM->data->apply(function ($x) { return (int)\ceil($x); });
+        $ceilM->data->apply($toIntMatrix
+            ? function ($x) : int { return (int)\ceil($x); }
+            : 'ceil'
+        );
 
         return $ceilM;
     }
@@ -557,7 +565,10 @@ final class FloatMatrix extends Matrix
             $floorM = $inPlace ? $this : clone $this;
         }
 
-        $floorM->data->apply(function ($x) { return (int)\floor($x); });
+        $floorM->data->apply($toIntMatrix
+            ? function ($x) { return (int)\floor($x); }
+            : 'floor'
+        );
 
         return $floorM;
     }
