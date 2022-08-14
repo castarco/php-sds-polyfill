@@ -1,5 +1,6 @@
 # PHP-SDS : Scientific Data Structures (polyfill)
 
+**WARNING:** This repository has been archived. I stopped maintaining it long ago, when my laptop was stolen and a lot of pending work was lost.
 
 [![Author](http://img.shields.io/badge/author-@castarco-blue.svg?style=flat-square)](https://twitter.com/castarco)
 [![Build Status](https://img.shields.io/travis/SciPHPy/php-sds-polyfill/master.svg?style=flat-square)](https://travis-ci.org/SciPHPy/php-sds-polyfill)
